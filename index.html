@@ -1,0 +1,2065 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- กัน browser cache ไฟล์นี้ทั้งไฟล์ค้าง (ไฟล์เดี่ยว inline script ไม่มี ?v= เหมือน admin/finance) -->
+<title>บ้านฟ้ากาแฟสด — POS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --safe-bottom:52px;   /* เว้นที่ให้แถบปุ่มของ Android — ปรับตรงนี้ถ้าบัง/เว้นเยอะไป */
+  --bg:#eef1f4;--surface:#fff;--ink:#141a22;--muted:#6b7784;--faint:#9aa5b1;
+  --line:#e6eaee;--line2:#eef1f4;--sky:#1683e0;--sky-d:#1069be;--sky-soft:#e7f2fd;
+  --caramel:#c9903f;--success:#129c63;--warn:#b8860b;--danger:#d5492f;
+  --shadow:0 1px 2px rgba(20,26,34,.04),0 4px 16px rgba(20,26,34,.06);
+  --shadow-lg:0 8px 40px rgba(20,26,34,.18);--r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body.locked{overflow:hidden}
+body{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.top{display:flex;align-items:center;padding:9px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0;z-index:20;position:-webkit-sticky;position:sticky;top:0}
+.logo{display:flex;align-items:center}
+.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(150deg,#3aa0ef,#1069be);position:relative;flex-shrink:0;box-shadow:0 2px 8px rgba(16,105,190,.35)}
+.mark::after{content:"";position:absolute;left:9px;bottom:9px;width:12px;height:12px;border-radius:50%;background:var(--caramel);box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+.logo .txt{line-height:1.1}
+.logo .txt b{font-size:16px;font-weight:800;letter-spacing:-.2px}
+.logo .txt span{display:block;font-size:11px;color:var(--faint);font-weight:600;letter-spacing:1.5px}
+.topnav{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-left:6px}
+.topnav button{padding:7px 16px;border-radius:8px;font-size:14px;font-weight:800;color:var(--muted)}
+.topnav button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.top .right{margin-left:auto;display:flex;align-items:center}
+.synced{font-size:12px;font-weight:800;padding:5px 10px;border-radius:8px}
+.synced.ok{background:#d8ede2;color:#0f6b45}.synced.pending{background:#fdf0d8;color:#8a6414}.synced.warn{background:#f3e3de;color:#9c3a28}
+.lang{display:flex;background:var(--bg);border-radius:10px;padding:3px}
+.lang button{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:800;color:var(--muted)}
+.lang button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.cashier{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--muted)}
+.cashier .av{width:30px;height:30px;border-radius:50%;background:var(--sky-soft);color:var(--sky-d);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-weight:800;font-size:13px}
+.logout{width:36px;height:36px;border-radius:10px;background:var(--bg);color:var(--muted);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}
+.body{flex:1;display:flex;-webkit-align-items:stretch;align-items:stretch}
+.catalog{flex:1;min-width:0;display:flex;flex-direction:column;padding:12px 16px calc(24px + var(--safe-bottom))}
+.tools{display:flex;align-items:center;margin-bottom:10px;flex-shrink:0}
+.search{flex:1;position:relative}
+.search input{width:100%;padding:10px 14px 10px 40px;border:1px solid var(--line);border-radius:12px;font-size:15px;background:var(--surface);color:var(--ink)}
+.search input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint)}
+.cats{display:flex;flex-wrap:wrap;padding-bottom:10px;flex-shrink:0}
+.cat{display:flex;align-items:center;padding:9px 15px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--muted);white-space:nowrap}
+.cat .dot{width:9px;height:9px;border-radius:50%}
+.cat.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid-wrap{position:relative}
+.secttl{font-size:13px;font-weight:800;color:var(--faint);margin:14px 2px 10px;letter-spacing:.3px;display:flex;align-items:center}
+.secttl .dot{width:9px;height:9px;border-radius:50%;margin-right:8px}
+.secttl .cnt2{margin-left:7px;font-size:11px;color:var(--faint);font-weight:700}
+.secttl .dot{width:9px;height:9px;border-radius:50%}
+.grid{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -5px 18px}
+.tile{margin:0 5px 10px;width:calc(16.666% - 10px);min-height:96px}
+@media(max-width:1500px){.tile{width:calc(20% - 10px)}}
+@media(max-width:1200px){.tile{width:calc(25% - 10px)}}
+@media(max-width:940px){.tile{width:calc(33.333% - 10px)}}
+@media(max-width:600px){.tile{width:calc(50% - 10px)}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:hidden;text-align:left;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:transform .08s;position:relative}
+.tile:active{transform:scale(.97)}
+.tile .strip{height:6px;width:100%}
+.tile .in{padding:12px 13px;display:flex;flex-direction:column;flex:1}
+.tile .nm{font-weight:700;font-size:14.5px;line-height:1.3}
+.tile .pr{margin-top:auto;font-weight:800;font-size:17px;letter-spacing:-.3px}
+.tile .so{font-size:12px;font-weight:700;color:var(--danger)}
+.tile .so.lo{color:var(--warn)}
+.tile.out{opacity:.45}
+.tile .badge{position:absolute;top:10px;right:10px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:7px;opacity:0;transform:scale(.6);transition:.15s}
+.tile.pop .badge{opacity:1;transform:scale(1)}
+.rail{width:380px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--line);display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column}
+.rail-h{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line2)}
+.rail-h .ttl{font-size:17px;font-weight:800}
+.rail-h .ttl small{color:var(--faint);font-weight:700;margin-left:6px}
+.rail-h button{color:var(--danger);font-size:13px;font-weight:700}
+
+.rail-list{-webkit-flex:1;flex:1;padding:6px 12px;min-height:120px;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column}
+.empty{-webkit-flex:1;flex:1;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;height:100%;color:var(--faint);text-align:center;padding:20px}
+.empty p{margin:0;font-size:15px;font-weight:600}
+.oline{display:flex;padding:8px 6px;border-bottom:1px solid var(--line2);align-items:center}
+.oline .oi{flex:1;min-width:0}
+.oline .oi .n{font-weight:700;font-size:14px;line-height:1.25}
+.oline .oi .opt{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.3}
+
+.stepper{display:flex;align-items:center;background:var(--bg);border-radius:10px;padding:3px}
+.stepper button{width:30px;height:30px;border-radius:8px;font-size:19px;font-weight:800;color:var(--ink);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}
+.stepper .q{min-width:30px;text-align:center;font-weight:800;font-size:15px}
+.oline .amt{font-weight:800;font-size:15px;width:66px;text-align:right}
+.rail-f{border-top:1px solid var(--line);padding:12px 18px calc(12px + var(--safe-bottom));background:var(--surface);flex-shrink:0;position:-webkit-sticky;position:sticky;bottom:0;z-index:15;box-shadow:0 -4px 16px rgba(20,26,34,.07)}
+.sumline{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.sumline.disc{color:var(--success)}
+.grand{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 10px;padding-top:9px;border-top:1px dashed var(--line)}
+.grand .l{font-size:15px;font-weight:700}
+.grand .v{font-size:30px;font-weight:900;letter-spacing:-.8px}
+.charge{width:100%;padding:15px;border-radius:14px;background:var(--sky);color:#fff;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(22,131,224,.32)}
+.charge:disabled{background:#c3ccd5;box-shadow:none}
+.admin{flex:1;overflow:auto;display:none;flex-direction:column}
+.subnav{display:flex;padding:16px 22px 0;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
+.subnav button{padding:9px 15px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-weight:800;font-size:14px;color:var(--muted)}
+.subnav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pane{padding:18px 22px;max-width:980px;margin:0 auto;width:100%}
+.rep-head{display:flex;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.rep-head h2{margin:0;font-size:22px;flex:1;min-width:140px}
+.rep-head input[type=date]{padding:10px 12px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:#fff}
+.rep-head .sep{color:var(--faint);font-weight:700}
+.rep-head button{padding:10px 15px;border-radius:11px;background:var(--ink);color:#fff;font-weight:800;font-size:14px}
+.rep-head button.ghost{background:var(--bg);color:var(--ink)}
+.quickdays{display:flex;margin-bottom:14px;flex-wrap:wrap}
+.quickdays button{padding:7px 13px;border-radius:9px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:13px;color:var(--muted)}
+.quickdays button.on{background:var(--sky-soft);border-color:var(--sky);color:var(--sky-d)}
+.stats{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -6px 10px}
+.stat{width:calc(25% - 12px);margin:0 6px 12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.stat .k{font-size:13px;color:var(--muted);font-weight:700}
+.stat .v{font-size:24px;font-weight:900;margin-top:4px;letter-spacing:-.5px}
+.stat .s{font-size:12px;color:var(--faint);font-weight:700;margin-top:2px}
+.stat.good .v{color:var(--success)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h3{margin:0 0 10px;font-size:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.trow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px;align-items:center}
+.trow .q{color:var(--muted);font-weight:700;margin-left:auto;margin-right:16px}
+.brow{display:flex;padding:10px 0;border-bottom:1px solid var(--line2);font-size:14px;align-items:center}
+.brow .tm{color:var(--muted);width:52px;flex-shrink:0}
+.brow .it{flex:1;min-width:0}
+.brow .am{font-weight:800;flex-shrink:0}
+.brow .vbtn{color:var(--danger);font-size:12px;font-weight:800;padding:4px 9px;border-radius:7px;background:#f8e9e5;flex-shrink:0}
+.brow.voided .it,.brow.voided .am{text-decoration:line-through;color:var(--faint)}
+.by{font-size:11px;color:var(--faint);font-weight:700}
+.pill{font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px;white-space:nowrap}
+.pill.cash{background:#eadfce;color:#7a5a2a}.pill.pp{background:#d8ede2;color:#0f6b45}
+.pill.void{background:#f3e3de;color:#9c3a28}.pill.warn{background:#fdf0d8;color:#8a6414}
+.pill.ok{background:#d8ede2;color:#0f6b45}
+.repmsg{text-align:center;color:var(--muted);padding:36px 20px;font-weight:600;line-height:1.6}
+.chart{display:flex;align-items:flex-end;height:150px;padding-top:10px}
+.chart .bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.chart .bar .b{width:100%;background:var(--sky);border-radius:5px 5px 0 0;min-height:2px;transition:.2s}
+.chart .bar .b.zero{background:var(--line)}
+.chart .bar .h{font-size:10px;color:var(--faint);font-weight:700}
+.chart .bar .val{font-size:10px;color:var(--muted);font-weight:800}
+.btn{padding:10px 16px;border-radius:11px;font-weight:800;font-size:14px}
+.btn.primary{background:var(--sky);color:#fff}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.ghost{background:var(--bg);color:var(--ink)}
+.btn.danger{background:#f8e9e5;color:var(--danger)}
+.btn.sm{padding:7px 12px;font-size:13px}
+.mrow{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.mrow input[type=text],.mrow input[type=number]{padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff}
+.mrow .mn{flex:1;min-width:90px}.mrow .mp{width:80px}.mrow .mc{width:135px}.mrow .mu{width:70px}
+.mrow select{padding:9px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff}
+.mrow .x{color:var(--danger);font-size:20px;padding:4px 8px;flex-shrink:0}
+.mrow .info{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+.mrow .info b{color:var(--success)}
+.mrow .info b.neg{color:var(--danger)}
+.sw{width:44px;height:26px;border-radius:14px;background:var(--line);position:relative;flex-shrink:0;transition:.15s}
+.sw.on{background:var(--success)}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+.sw.on::after{left:21px}
+.addbar{display:flex;align-items:center;margin-top:12px;flex-wrap:wrap}
+.addbar input,.addbar select{padding:10px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff}
+.addbar .an{flex:1;min-width:110px}
+.chips{display:flex;flex-wrap:wrap;margin:8px 0}
+.chip{padding:6px 11px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--muted)}
+.chip.on{background:var(--sky-soft);border-color:var(--sky);color:var(--sky-d)}
+.opt-g{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.opt-g .gh{display:flex;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.opt-g .gh input{flex:1;min-width:110px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-weight:700;background:#fff}
+.opt-g .gh select{padding:9px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff}
+.lbl{font-size:12px;font-weight:800;color:var(--faint);margin:12px 0 4px;text-transform:none}
+.rec-item{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.rec-item .rh{display:flex;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.rec-item .rh b{font-size:15px;flex:1;min-width:120px}
+.mobar{display:none}
+.scrim{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(20,26,34,.5);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:41;background:var(--surface);box-shadow:var(--shadow-lg);right:0;top:0;bottom:0;width:440px;max-width:100%;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.sheet.on{transform:none}
+.sheet-h{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line2)}
+.sheet-h b{font-size:18px}
+.sheet-h .sub{font-size:13px;color:var(--muted);font-weight:600}
+.sheet-h button{width:34px;height:34px;border-radius:10px;background:var(--bg);font-size:20px;color:var(--muted);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}
+.sheet-b{flex:1;overflow:auto;padding:22px}
+.paytot{text-align:center;margin-bottom:20px}
+.paytot .k{font-size:14px;color:var(--muted);font-weight:600}
+.paytot .v{font-size:40px;font-weight:900;letter-spacing:-1px;margin-top:2px}
+.seg{display:flex;margin-bottom:20px}
+.seg button{flex:1;padding:14px 8px;border-radius:13px;background:var(--bg);font-weight:800;font-size:15px;color:var(--muted);display:flex;flex-direction:column;align-items:center;border:2px solid transparent}
+.seg button.on{background:var(--sky-soft);color:var(--sky-d);border-color:var(--sky)}
+.seg svg{width:22px;height:22px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:7px}
+.field input{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;font-size:18px;font-weight:700;background:var(--surface)}
+.field input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.quick{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:10px -4px 0}
+.quick button{width:calc(25% - 8px);margin:0 4px 8px}
+.quick button{padding:12px 4px;border-radius:11px;background:var(--bg);font-weight:800;font-size:14px}
+.disc-row{display:flex}
+.disc-row input{flex:1}
+.disc-row .u{display:flex;background:var(--bg);border-radius:12px;padding:3px}
+.disc-row .u button{padding:0 16px;border-radius:9px;font-weight:800;color:var(--muted);font-size:15px}
+.disc-row .u button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.changebox{background:var(--bg);border-radius:14px;padding:16px;text-align:center;margin-top:6px}
+.changebox .k{font-size:13px;color:var(--muted);font-weight:700}
+.changebox .v{font-size:32px;font-weight:900;color:var(--success);margin-top:2px}
+.qrbox{display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.qr-real{width:236px;min-height:236px;border-radius:16px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:8px}
+.qr-note{font-size:14px;color:var(--muted);font-weight:600;text-align:center}
+.qr-note b{color:var(--ink)}
+.sheet-f{padding:16px 22px calc(16px + var(--safe-bottom));border-top:1px solid var(--line)}
+.confirm{width:100%;padding:17px;border-radius:14px;background:var(--success);color:#fff;font-size:17px;font-weight:800}
+.confirm:disabled{background:#c3ccd5}
+.ogroup{margin-bottom:20px}
+.ogroup .gt{font-size:15px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;flex-wrap:wrap}
+.ogroup .gt .req{font-size:11px;font-weight:800;color:var(--danger)}
+.ogroup .gt .multi{font-size:11px;font-weight:700;color:var(--faint)}
+.ogrid{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -4px}
+.oopt{width:calc(50% - 9px);margin:0 4px 9px}
+.oopt{padding:14px 12px;border-radius:13px;background:var(--bg);border:2px solid transparent;font-weight:700;font-size:15px;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.oopt.on{background:var(--sky-soft);border-color:var(--sky);color:var(--sky-d)}
+.oopt .op{font-size:13px;color:var(--muted);font-weight:800}
+.oopt.on .op{color:var(--sky-d)}
+.oqty{display:flex;align-items:center;justify-content:center;margin:6px 0 4px}
+.oqty button{width:44px;height:44px;border-radius:12px;background:var(--bg);font-size:24px;font-weight:800}
+.oqty .n{font-size:22px;font-weight:900;min-width:40px;text-align:center}
+.addopt{width:100%;padding:17px;border-radius:14px;background:var(--sky);color:#fff;font-size:17px;font-weight:800}
+.addopt:disabled{background:#c3ccd5}
+.done{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:var(--surface);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+.done.on{display:flex}
+.done .ring{width:96px;height:96px;border-radius:50%;background:var(--success);}
+.done .ring.bad{background:var(--danger)}
+.done .ring{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;animation:pop .35s cubic-bezier(.2,1.4,.5,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.done h2{margin:0;font-size:24px}.done p{margin:0;color:var(--muted);font-size:16px;font-weight:600}
+.done .amt{font-size:30px;font-weight:900}
+.done button{margin-top:8px;padding:15px 32px;border-radius:13px;background:var(--ink);color:#fff;font-weight:800;font-size:16px}
+.login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:80;background:linear-gradient(160deg,#eaf2fb,#eef1f4);display:none;align-items:center;justify-content:center;padding:20px}
+.login.on{display:flex}
+.loginbox{background:#fff;border-radius:24px;padding:28px 26px;width:340px;max-width:92%;text-align:center;box-shadow:var(--shadow-lg)}
+.loginbox .mark.lg{width:60px;height:60px;border-radius:19px;margin:0 auto 12px}
+.loginbox .mark.lg::after{left:14px;bottom:14px;width:19px;height:19px}
+.lgname{font-size:20px;font-weight:800}
+.lgsub{color:var(--muted);font-size:14px;font-weight:600;margin-top:4px}
+.dots{display:flex;justify-content:center;height:16px;margin:20px 0 6px}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.dots i.f{background:var(--sky)}
+.lgerr{color:var(--danger);font-size:13px;font-weight:700;height:18px;margin-bottom:8px}
+.keypad{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -5px}
+.keypad button{width:calc(33.333% - 10px);margin:0 5px 10px}
+.keypad button{padding:17px 0;border-radius:16px;background:var(--bg);font-size:24px;font-weight:800;color:var(--ink)}
+.keypad button.alt{background:#f3e3de;color:var(--danger);font-size:20px}
+.keypad button.go{background:var(--sky);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(26px + var(--safe-bottom));transform:translateX(-50%) translateY(24px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:13px;font-weight:700;font-size:15px;opacity:0;transition:.25s;z-index:95;pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--danger)}.toast.ok{background:var(--success)}
+.dlg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(20,26,34,.5);display:none;align-items:center;justify-content:center;z-index:90;padding:20px}
+.dlg.on{display:flex}
+.dlgbox{background:#fff;border-radius:20px;padding:24px;width:380px;max-width:94%;box-shadow:var(--shadow-lg)}
+.dlgbox b{font-size:17px;display:block;margin-bottom:8px}
+.dlgbox p{margin:0 0 16px;color:var(--muted);font-size:14px;font-weight:600;line-height:1.5}
+.dlgbox input,.dlgbox select{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;font-size:15px;margin-bottom:14px;background:#fff}
+.dlgbtns{display:flex}
+.dlgbtns button{flex:1;padding:14px;border-radius:12px;font-weight:800;font-size:15px}
+.dlgbtns .no{background:var(--bg);color:var(--ink)}
+.dlgbtns .yes{background:var(--danger);color:#fff}
+.dlgbtns .yes.safe{background:var(--sky)}
+
+/* --- shift (เปิด/ปิดกะ) --- */
+.shiftbtn{padding:8px 14px;border-radius:10px;background:var(--bg);color:var(--ink);font-weight:800;font-size:13px}
+.shiftbtn.warn{background:#fdf0d8;color:#8a6414}
+.shiftinfo{font-size:12px;color:var(--faint);font-weight:700;white-space:nowrap}
+.sv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:75;background:var(--bg);display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sv.on{display:block}
+.sv-in{max-width:560px;margin:0 auto;padding:22px 18px calc(40px + var(--safe-bottom))}
+.sv h2{margin:0 0 4px;font-size:23px}
+.sv .sub{color:var(--muted);font-size:14px;font-weight:600;margin-bottom:18px}
+.sv .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.sv .card h3{margin:0 0 10px;font-size:15px;font-weight:800}
+.srow{display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;-webkit-align-items:center;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2);font-size:15px}
+.srow:last-child{border-bottom:none}
+.srow .k{color:var(--muted);font-weight:600}
+.srow .v{font-weight:800}
+.srow.big .v{font-size:22px}
+.srow.tot{border-top:2px solid var(--line);border-bottom:none;margin-top:6px;padding-top:14px}
+.sv input[type=number]{width:100%;padding:15px;border:1px solid var(--line);border-radius:12px;font-size:22px;font-weight:800;text-align:center;background:#fff}
+.sv input[type=number]:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-soft)}
+.sv .hint{font-size:13px;color:var(--muted);font-weight:600;margin-top:8px;line-height:1.5}
+.diffbox{border-radius:14px;padding:16px;text-align:center;margin-top:12px}
+.diffbox .k{font-size:13px;font-weight:700;margin-bottom:2px}
+.diffbox .v{font-size:30px;font-weight:900}
+.diffbox.ok{background:#d8ede2}.diffbox.ok .k{color:#0f6b45}.diffbox.ok .v{color:var(--success)}
+.diffbox.bad{background:#f8e9e5}.diffbox.bad .k{color:#9c3a28}.diffbox.bad .v{color:var(--danger)}
+.diffbox.neutral{background:var(--bg)}.diffbox.neutral .k{color:var(--muted)}.diffbox.neutral .v{color:var(--ink)}
+.sv-btns{display:-webkit-flex;display:flex;margin-top:6px}
+.sv-btns button{-webkit-flex:1;flex:1;padding:17px;border-radius:14px;font-weight:800;font-size:16px;margin-right:10px}
+.sv-btns button:last-child{margin-right:0}
+.sv-btns .cancel{background:var(--bg);color:var(--ink)}
+.sv-btns .ok{background:var(--sky);color:#fff}
+.sv-btns .ok:disabled{background:#c3ccd5}
+.sv-btns .close{background:var(--danger);color:#fff}
+.qcash{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:10px -4px 0}
+.qcash button{width:calc(25% - 8px);margin:0 4px 8px;padding:12px 4px;border-radius:11px;background:var(--bg);font-weight:800;font-size:14px}
+.topitem{display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line2);font-size:14px}
+
+/* --- Chrome 56 spacing fallbacks (no flex-gap support) --- */
+.top>*{margin-right:14px}
+.top>*:last-child{margin-right:0}
+.logo>*{margin-right:11px}
+.logo>*:last-child{margin-right:0}
+.top .right>*{margin-right:12px}
+.top .right>*:last-child{margin-right:0}
+.lang button+button,.topnav button+button{margin-left:0}
+.cashier>*{margin-right:8px}
+.cashier>*:last-child{margin-right:0}
+.tools>*{margin-right:12px}
+.tools>*:last-child{margin-right:0}
+.cats .cat{margin:0 9px 9px 0}
+.cat .dot{margin-right:8px}
+.secttl .dot{margin-right:8px}
+.oline>*{margin-right:12px}
+.oline>*:last-child{margin-right:0}
+.charge>span{margin-right:8px}
+.charge>span:last-child{margin-right:0}
+.subnav button{margin:0 8px 0 0}
+.rep-head>*{margin:0 10px 0 0}
+.rep-head>*:last-child{margin-right:0}
+.quickdays button{margin:0 6px 6px 0}
+.seg button{margin-right:8px}
+.seg button:last-child{margin-right:0}
+.seg svg{margin-bottom:6px}
+.disc-row>*{margin-right:8px}
+.disc-row>*:last-child{margin-right:0}
+.mrow>*{margin:0 8px 0 0}
+.mrow>*:last-child{margin-right:0}
+.addbar>*{margin:0 8px 8px 0}
+.chips .chip{margin:0 7px 7px 0}
+.card h3>*{margin-left:10px}
+.trow>*{margin-right:8px}
+.trow>*:last-child{margin-right:0}
+.brow>*{margin-right:10px}
+.brow>*:last-child{margin-right:0}
+.empty>*{margin-bottom:12px}
+.empty>*:last-child{margin-bottom:0}
+.done>*{margin-bottom:16px}
+.done>*:last-child{margin-bottom:0}
+.dots i{margin-right:12px}
+.dots i:last-child{margin-right:0}
+.qrbox>*{margin-bottom:14px}
+.qrbox>*:last-child{margin-bottom:0}
+.oqty>*{margin-right:14px}
+.oqty>*:last-child{margin-right:0}
+.mbtns button,.dlgbtns button{margin-right:10px}
+.mbtns button:last-child,.dlgbtns button:last-child{margin-right:0}
+.mobar>*{margin-right:14px}
+.mobar>*:last-child{margin-right:0}
+.rec-item .rh>*{margin:0 10px 6px 0}
+.opt-g .gh>*{margin:0 8px 6px 0}
+.ogroup .gt>*{margin-right:8px}
+.chart .bar{margin-right:4px}
+.chart .bar:last-child{margin-right:0}
+
+@media(max-width:900px){
+  .rail{display:none;position:static}.catalog{padding-bottom:calc(96px + var(--safe-bottom))}.stat{width:calc(50% - 12px)}
+  .mobar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + var(--safe-bottom));align-items:center;box-shadow:0 -4px 20px rgba(20,26,34,.08)}
+  .mobar .info{flex:1}.mobar .info .c{font-size:13px;color:var(--muted);font-weight:700}
+  .mobar .info .t{font-size:22px;font-weight:900}
+  .mobar .view{padding:15px 26px;border-radius:13px;background:var(--sky);color:#fff;font-weight:800;font-size:16px}
+  .mobar.hide{display:none}
+  .sheet{width:100%;left:0;right:0;top:8%;bottom:0;height:auto;border-radius:22px 22px 0 0;transform:translateY(100%)}
+  .sheet.on{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="login on" id="login">
+  <div class="loginbox">
+    <div class="mark lg"></div>
+    <div class="lgname">บ้านฟ้ากาแฟสด</div>
+    <div class="lgsub" id="lgSub">ใส่ PIN เพื่อเข้าใช้งาน</div>
+    <div class="dots" id="pinDots"></div>
+    <div class="lgerr" id="lgErr"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="clear" class="alt">C</button><button data-k="0">0</button><button data-k="enter" class="go">✓</button>
+    </div>
+    <div id="verTag" style="margin-top:14px;font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.5px">POS</div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="top">
+    <div class="logo"><div class="mark"></div><div class="txt"><b>บ้านฟ้ากาแฟสด</b><span id="brandVer">BANFA COFFEE</span></div></div>
+    <div class="topnav">
+      <button data-view="sell" class="on" id="navSell">ขาย</button>
+      <button id="navAdmin" title="เปิดหน้าหลังบ้าน">หลังบ้าน ↗</button>
+    </div>
+    <div class="right">
+      <span class="shiftinfo" id="shiftInfo"></span>
+      <button class="shiftbtn" id="cashBtn" title="บันทึกรายจ่ายจากลิ้นชัก">+ รายจ่าย</button>
+      <button class="shiftbtn" id="shiftBtn">ปิดกะ</button>
+      <div class="synced ok" id="syncChip">ซิงค์แล้ว</div>
+      <div class="cashier"><span class="av" id="roleAv">S</span><span id="cashierLbl">—</span></div>
+      <button class="logout" id="logoutBtn" title="ออกจากระบบ"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button>
+    </div>
+  </div>
+  <div class="body">
+    <div id="viewSell" style="flex:1;display:flex;min-height:0">
+      <div class="catalog">
+        <div class="tools"><div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+          <input id="search" type="text"></div></div>
+        <div class="cats" id="cats"></div>
+        <div class="grid-wrap" id="gridWrap"></div>
+      </div>
+      <div class="rail">
+        <div class="rail-h"><div class="ttl" id="orderTtl">ออเดอร์ <small id="orderCount"></small></div><button id="clearBtn" style="display:none">ล้าง</button></div>
+        <div class="rail-list" id="orderList"></div>
+        <div class="rail-f">
+          <div class="sumline"><span id="subLbl">ยอดรวมย่อย</span><span id="subVal">฿0</span></div>
+          <div class="sumline disc" id="discLine" style="display:none"><span id="discLbl">ส่วนลด</span><span id="discVal">-฿0</span></div>
+          <div class="grand"><span class="l" id="totLbl">ยอดสุทธิ</span><span class="v" id="totVal">฿0</span></div>
+          <button class="charge" id="chargeBtn" disabled><span id="chargeLbl">ชำระเงิน</span><span id="chargeVal"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="admin" id="viewAdmin">
+      <div class="subnav">
+        <button data-tab="reports" class="on" id="tabReports">รายงาน</button>
+        <button data-tab="menu" id="tabMenu">เมนู</button>
+        <button data-tab="recipe" id="tabRecipe">สูตร &amp; ต้นทุน</button>
+        <button data-tab="ing" id="tabIng">วัตถุดิบ</button>
+        <button data-tab="options" id="tabOptions">ตัวเลือก</button>
+        <button data-tab="staff" id="tabStaff">พนักงาน</button>
+        <button data-tab="audit" id="tabAudit">ประวัติการแก้ไข</button>
+        <button data-tab="settings" id="tabSettings">ตั้งค่า</button>
+      </div>
+      <div class="pane" id="paneReports" style="display:none">
+        <div class="rep-head">
+          <h2>รายงานยอดขาย</h2>
+          <input type="date" id="repFrom"><span class="sep">–</span><input type="date" id="repTo">
+          <button class="ghost" id="repRefresh">รีเฟรช</button>
+          <button class="ghost" id="repCsv">CSV</button>
+          <button id="repSync">โหลดใหม่</button>
+        </div>
+        <div class="quickdays" id="quickDays">
+          <button data-d="0" class="on">วันนี้</button><button data-d="1">เมื่อวาน</button>
+          <button data-d="7">7 วัน</button><button data-d="30">30 วัน</button>
+        </div>
+        <div id="repBody"></div>
+      </div>
+      <div class="pane" id="paneMenu" style="display:none"></div>
+      <div class="pane" id="paneRecipe" style="display:none"></div>
+      <div class="pane" id="paneIng" style="display:none"></div>
+      <div class="pane" id="paneOptions" style="display:none"></div>
+      <div class="pane" id="paneStaff" style="display:none"></div>
+      <div class="pane" id="paneAudit" style="display:none"></div>
+      <div class="pane" id="paneSettings" style="display:none"></div>
+    </div>
+  </div>
+  <div class="mobar hide" id="mobar"><div class="info"><div class="c" id="moCount"></div><div class="t" id="moTot">฿0</div></div><button class="view" id="moView">ดูออเดอร์</button></div>
+</div>
+
+<div class="scrim" id="optScrim"></div>
+<div class="sheet" id="optSheet">
+  <div class="sheet-h"><div><b id="optName"></b><div class="sub" id="optBase"></div></div><button id="optClose">×</button></div>
+  <div class="sheet-b" id="optBody"></div>
+  <div class="sheet-f"><button class="addopt" id="optAdd">เพิ่มลงออเดอร์ · <span id="optTotal">฿0</span></button></div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-h"><b id="payTtl">ชำระเงิน</b><button id="sheetClose">×</button></div>
+  <div class="sheet-b">
+    <div class="paytot"><div class="k" id="payingLbl">ยอดที่ต้องชำระ</div><div class="v" id="payTot">฿0</div></div>
+    <div class="field"><label id="discFieldLbl">ส่วนลด</label><div class="disc-row">
+      <input id="discInput" type="number" inputmode="numeric" placeholder="0">
+      <div class="u"><button data-du="baht" class="on">฿</button><button data-du="pct">%</button></div></div></div>
+    <div class="seg">
+      <button data-pm="cash" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg><span id="pmCashLbl">เงินสด</span></button>
+      <button data-pm="pp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v7M17 20h4"/></svg><span>พร้อมเพย์</span></button>
+    </div>
+    <div id="cashPane">
+      <div class="field"><label id="tenderLbl">รับเงินมา</label><input id="tender" type="number" inputmode="numeric" placeholder="0"><div class="quick" id="quick"></div></div>
+      <div class="changebox"><div class="k" id="changeLbl">เงินทอน</div><div class="v" id="changeVal">฿0</div></div>
+    </div>
+    <div id="ppPane" style="display:none"><div class="qrbox"><div class="qr-real" id="qrReal"></div><div class="qr-note" id="ppNote"></div></div></div>
+  </div>
+  <div class="sheet-f"><button class="confirm" id="confirmBtn"><span id="confirmLbl">ยืนยันการชำระ</span></button></div>
+</div>
+
+<div class="done" id="done">
+  <div class="ring" id="doneRing"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+  <h2 id="doneLbl">ชำระเงินสำเร็จ</h2><div class="amt" id="doneAmt">฿0</div><p id="doneSub"></p>
+  <button id="newOrder">ออเดอร์ถัดไป</button>
+</div>
+
+
+<div class="sv" id="openShift"><div class="sv-in">
+  <h2>เปิดกะการขาย</h2>
+  <div class="sub" id="osWho"></div>
+  <div class="card">
+    <h3>เงินทอนตั้งต้นในลิ้นชัก</h3>
+    <input type="number" id="osCash" inputmode="numeric" value="2000">
+    <div class="qcash" id="osQuick">
+      <button data-c="1000">1,000</button><button data-c="2000">2,000</button>
+      <button data-c="3000">3,000</button><button data-c="5000">5,000</button>
+    </div>
+    <div class="hint">นับเงินทอนที่ใส่ไว้ในลิ้นชักตอนเช้า แล้วกรอกยอดจริง — ตอนปิดกะระบบจะใช้ตัวเลขนี้คำนวณว่าเงินขาดหรือเกิน</div>
+  </div>
+  <div class="sv-btns"><button class="ok" id="osStart">เปิดกะ เริ่มขาย</button></div>
+</div></div>
+
+<div class="sv" id="pending"><div class="sv-in">
+  <h2>บิลที่ยังไม่เข้าระบบ</h2>
+  <div class="sub">บิลเหล่านี้รับเงินลูกค้าไปแล้ว แต่บันทึกขึ้นระบบไม่สำเร็จ — กดส่งซ้ำเมื่อเน็ตกลับมา</div>
+  <div class="card" id="pdSum"></div>
+  <div class="card"><h3>รายการ</h3><div id="pdList"></div></div>
+  <div class="sv-btns">
+    <button class="cancel" id="pdClose">ปิด</button>
+    <button class="ok" id="pdSend">ส่งซ้ำทั้งหมด</button>
+  </div>
+  <div class="addbar" style="margin-top:12px;display:flex;flex-wrap:wrap">
+    <button class="btn ghost" id="pdCsv" style="flex:1;padding:13px;border-radius:12px;background:var(--bg);font-weight:800">ส่งออก CSV เก็บไว้</button>
+    <button class="btn ghost" id="pdClear" style="flex:1;padding:13px;border-radius:12px;background:#f8e9e5;color:var(--danger);font-weight:800">ล้างรายการ</button>
+  </div>
+</div></div>
+
+<div class="sv" id="cashMove"><div class="sv-in">
+  <h2>บันทึกรายจ่าย</h2>
+  <div class="sub">บันทึกเงินที่หยิบออกจากลิ้นชักไปจ่าย — เพื่อให้ตอนปิดกะยอดตรง</div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0;margin-bottom:6px">จำนวนเงิน</div>
+    <input type="number" id="cmAmt" inputmode="numeric" placeholder="0">
+    <div class="lbl" style="margin:14px 0 6px">เหตุผล — กดเลือก</div>
+    <div class="chips" id="cmChips"></div>
+    <input type="text" id="cmReason" placeholder="พิมพ์เหตุผลเอง" style="display:none;text-align:left;font-size:16px;margin-top:10px">
+  </div>
+  <div class="card"><h3>รายการในกะนี้</h3><div id="cmList"></div></div>
+  <div class="sv-btns"><button class="cancel" id="cmCancel">ปิด</button><button class="ok" id="cmSave">บันทึก</button></div>
+</div></div>
+
+<div class="sv" id="closeShift"><div class="sv-in">
+  <h2>ปิดกะ &amp; สรุปยอด</h2>
+  <div class="sub" id="csWho"></div>
+  <div class="card"><h3>ยอดขายในกะนี้</h3><div id="csSummary"></div></div>
+  <div class="card"><h3>สินค้าขายดีในกะ</h3><div id="csTop"></div></div>
+  <div class="card">
+    <h3>นับเงินในลิ้นชัก</h3>
+    <div class="srow"><span class="k">เงินทอนตั้งต้น</span><span class="v" id="csOpen">฿0</span></div>
+    <div class="srow"><span class="k">+ ขายเป็นเงินสด</span><span class="v" id="csCash">฿0</span></div>
+    <div class="srow tot big"><span class="k">เงินที่ควรมีในลิ้นชัก</span><span class="v" id="csExpect">฿0</span></div>
+    <div style="margin-top:14px"><div class="lbl" style="margin-bottom:6px">นับเงินจริงในลิ้นชักแล้วกรอกที่นี่</div>
+      <input type="number" id="csCounted" inputmode="numeric" placeholder="0"></div>
+    <div class="diffbox neutral" id="csDiff"><div class="k">ผลต่าง</div><div class="v">—</div></div>
+    <div class="card" id="csQuickExp" style="display:none;margin-top:14px;padding:14px;background:var(--bg);border-radius:12px">
+      <div class="lbl" style="margin-top:0">เงินขาด — มีรายจ่ายที่ยังไม่ได้บันทึกหรือเปล่า?</div>
+      <div class="chips" id="csqChips"></div>
+      <input type="text" id="csqReason" placeholder="พิมพ์เหตุผลเอง" style="display:none;text-align:left;font-size:15px;margin:10px 0">
+      <input type="number" id="csqAmt" inputmode="numeric" placeholder="จำนวนเงิน">
+      <button class="ok" id="csqSave" style="margin-top:10px;width:100%">+ บันทึกรายจ่าย</button>
+    </div>
+    <div class="hint">พร้อมเพย์ไม่นับรวม เพราะไม่ได้อยู่ในลิ้นชัก</div>
+  </div>
+  <div class="sv-btns">
+    <button class="cancel" id="csCancel">ยังไม่ปิด</button>
+    <button class="close" id="csConfirm">ยืนยันปิดกะ</button>
+  </div>
+</div></div>
+
+<div class="dlg" id="dlg"><div class="dlgbox">
+  <b id="dlgTitle"></b><p id="dlgMsg"></p>
+  <input id="dlgInput" type="text" style="display:none">
+  <div class="dlgbtns"><button class="no" id="dlgNo">ยกเลิก</button><button class="yes" id="dlgYes">ยืนยัน</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<script src="config-pos.js"></script>
+<script>
+/* ================= CONFIG ================= */
+var APP_VERSION="2026.09.24-d";
+/* ค่าจริง (URL/KEY/รหัสผ่าน) อยู่ที่ config-pos.js แยกไฟล์ — โหลดจาก <script src> ก่อนบล็อกนี้แล้ว
+   ไฟล์นั้นไม่ขึ้น git ถ้าเพิ่งโคลนเครื่องใหม่แล้วเจอ "CONFIG is not defined"
+   ให้ก็อป config-pos.example.js เป็น config-pos.js แล้วใส่ค่าจริงตามคู่มือใน README.md */
+/* ========================================== */
+
+var T={th:{},en:{}};
+var lang="th";   /* ภาษาไทยอย่างเดียว — ถอดตัวสลับออกแล้ว */
+var L=function(){return {order:"ออเดอร์",items:"รายการ",empty:"แตะเมนูเพื่อเริ่มขาย",all:"ทั้งหมด",
+  cash:"เงินสด",pp:"พร้อมเพย์",change:"เงินทอน",scan:"สแกนเพื่อจ่าย",qty:"แก้ว",out:"หมด",
+  by:function(m){return m==="cash"?"เงินสด":"พร้อมเพย์"}}};
+
+var CATS=[
+  {id:"hc",th:"ร้อน-มีกาแฟ",c:"#b5732e"},{id:"hn",th:"ร้อน-ไม่มีกาแฟ",c:"#d98a3f"},
+  {id:"ic",th:"เย็น-มีกาแฟ",c:"#2e86c9"},{id:"in",th:"เย็น-ไม่มีกาแฟ",c:"#33a9b0"},
+  {id:"fc",th:"ปั่น-มีกาแฟ",c:"#7d5aa8"},{id:"fn",th:"ปั่น-ไม่มีกาแฟ",c:"#b268a0"},
+  {id:"sm",th:"Smoothie",c:"#d95f7d"},{id:"etc",th:"อื่นๆ",c:"#7a8896"}
+];
+function catObj(id){return CATS.find(function(x){return x.id===id})}
+var catColor=function(id){var c=catObj(id);return c?c.c:"#7a8896"};
+
+var DEFAULT_MENU=[
+  {id:1,name:"มอคค่า-ร้อน",price:40,cat:"hc"},{id:2,name:"อเมริกาโน-ร้อน",price:30,cat:"hc"},
+  {id:3,name:"เอสเพรสโซ-ร้อน",price:30,cat:"hc"},{id:4,name:"คาปูชิโน-ร้อน",price:40,cat:"hc"},
+  {id:5,name:"ลาเต้-ร้อน",price:40,cat:"hc"},
+  {id:6,name:"ชาเขียวนมสด-ร้อน",price:40,cat:"hn"},{id:7,name:"ชาไทย-ร้อน",price:35,cat:"hn"},
+  {id:8,name:"นมสด-ร้อน",price:35,cat:"hn"},{id:9,name:"โกโก้-ร้อน",price:35,cat:"hn"},
+  {id:10,name:"ชาเขียวมัทฉะ-ร้อน",price:45,cat:"hn"},
+  {id:11,name:"เอสเพรสโซ-เย็น",price:45,cat:"ic"},{id:12,name:"อเมริกาโน-เย็น",price:45,cat:"ic"},
+  {id:13,name:"คาปูชิโน-เย็น",price:50,cat:"ic"},{id:14,name:"ลาเต้-เย็น",price:50,cat:"ic"},
+  {id:15,name:"มอคค่า-เย็น",price:50,cat:"ic"},{id:16,name:"อเมริกาโน่ น้ำผึ้งมะนาว",price:50,cat:"ic"},
+  {id:17,name:"อเมริกาโน ส้ม",price:50,cat:"ic"},
+  {id:18,name:"ชาไทย-เย็น",price:45,cat:"in"},{id:19,name:"นมสด-เย็น",price:45,cat:"in"},
+  {id:20,name:"โกโก้-เย็น",price:45,cat:"in"},{id:21,name:"ชาดำเย็น",price:45,cat:"in"},
+  {id:22,name:"ชาพีช-เย็น",price:45,cat:"in"},{id:23,name:"ชาสุดขอบฟ้า-เย็น",price:50,cat:"in"},
+  {id:24,name:"ชาแอปเปิ้ล-เย็น",price:45,cat:"in"},{id:25,name:"ชามะนาว-เย็น",price:45,cat:"in"},
+  {id:26,name:"ชาเขียวมัทฉะ-เย็น",price:50,cat:"in"},{id:27,name:"ชาเขียวนมสด-เย็น",price:50,cat:"in"},
+  {id:28,name:"นมชมพู-เย็น",price:45,cat:"in"},{id:29,name:"น้ำอัญชัญมะนาว-เย็น",price:45,cat:"in"},
+  {id:30,name:"น้ำพั๊นซ์-เย็น",price:45,cat:"in"},
+  {id:31,name:"เอสเพรสโซ-ปั่น",price:55,cat:"fc"},{id:32,name:"อเมริกาโน-ปั่น",price:55,cat:"fc"},
+  {id:33,name:"คาปูชิโน-ปั่น",price:60,cat:"fc"},{id:34,name:"มอคค่า-ปั่น",price:60,cat:"fc"},
+  {id:35,name:"ลาเต้-ปั่น",price:60,cat:"fc"},
+  {id:36,name:"ชาพีช-ปั่น",price:50,cat:"fn"},{id:37,name:"ชามะนาว-ปั่น",price:50,cat:"fn"},
+  {id:38,name:"จ๊าบ๊ะ-ปั่น",price:55,cat:"fn"},{id:39,name:"โกโก้-ปั่น",price:55,cat:"fn"},
+  {id:40,name:"ชาไทย-ปั่น",price:55,cat:"fn"},{id:41,name:"ชาสุดขอบฟ้า-ปั่น",price:60,cat:"fn"},
+  {id:42,name:"ชาเขียวนมสด-ปั่น",price:60,cat:"fn"},{id:43,name:"ชาเขียวมัทฉะ-ปั่น",price:60,cat:"fn"},
+  {id:44,name:"นมสด-ปั่น",price:55,cat:"fn"},{id:45,name:"ชาแอปเปิ้ล-ปั่น",price:50,cat:"fn"},
+  {id:46,name:"บลูเบอรี่+องุ่น-Smoothie",price:60,cat:"sm"},{id:47,name:"สตรอเบอรี่+ลิ้นจี่-Smoothie",price:60,cat:"sm"},
+  {id:48,name:"เสาวรส+มะม่วง-Smoothie",price:60,cat:"sm"},
+  {id:49,name:"น้ำอัดลม",price:16,cat:"etc"},{id:50,name:"สาหร่าย",price:20,cat:"etc"},
+  {id:51,name:"กรอบกลม",price:40,cat:"etc"},{id:52,name:"ทองม้วน",price:35,cat:"etc"},
+  {id:53,name:"ลูกอม",price:10,cat:"etc"},{id:54,name:"ปังกรอบ",price:25,cat:"etc"},
+  {id:55,name:"บ๊วย",price:20,cat:"etc"},{id:56,name:"น้ำเปล่า",price:10,cat:"etc"},
+  {id:57,name:"กล้วยตาก",price:50,cat:"etc"},{id:58,name:"ขาไก่",price:20,cat:"etc"},
+  {id:59,name:"กล้วยฉาบ",price:45,cat:"etc"},{id:60,name:"ปังก้อน",price:15,cat:"etc"},
+  {id:61,name:"กล้วยตาก100",price:100,cat:"etc"},{id:62,name:"ทิชชู่",price:10,cat:"etc"},
+  {id:63,name:"น้ำส้ม",price:15,cat:"etc"},{id:64,name:"จิ้มจาด",price:35,cat:"etc"},
+  {id:65,name:"พายสับปะรด",price:40,cat:"etc"}
+];
+var DRINK_CATS=["hc","hn","ic","in","fc","fn","sm"];
+var DEFAULT_OPTS=[
+  {id:"g_sweet",name:"ระดับความหวาน",type:"single",required:true,cats:DRINK_CATS.slice(),
+    options:[{name:"หวานปกติ",price:0,ing:"",iqty:0},{name:"หวานน้อย",price:0,ing:"",iqty:0},{name:"หวานมาก",price:0,ing:"",iqty:0}]},
+  {id:"g_cup",name:"แก้ว",type:"single",required:true,cats:DRINK_CATS.slice(),
+    options:[{name:"นำแก้วมาเอง",price:0,ing:"",iqty:0},{name:"ไม่ได้นำแก้วมา",price:0,ing:"",iqty:0},{name:"แก้วใหญ่",price:10,ing:"",iqty:0}]}
+];
+var DEFAULT_ING=[
+  {id:"i_coffee",name:"เมล็ดกาแฟ",unit:"g",stock:5000,cost:0.6,low:500},
+  {id:"i_cream",name:"ครีมเทียม",unit:"g",stock:3000,cost:0.15,low:300},
+  {id:"i_milk",name:"นมสด",unit:"ml",stock:6000,cost:0.05,low:1000},
+  {id:"i_sugar",name:"น้ำเชื่อม",unit:"ml",stock:4000,cost:0.03,low:500},
+  {id:"i_ice",name:"น้ำแข็ง",unit:"g",stock:20000,cost:0.005,low:2000},
+  {id:"i_cup16",name:"แก้ว 16 oz",unit:"ใบ",stock:300,cost:2.2,low:50},
+  {id:"i_cup22",name:"แก้ว 22 oz",unit:"ใบ",stock:200,cost:2.8,low:50},
+  {id:"i_lid",name:"ฝาแก้ว",unit:"ใบ",stock:500,cost:0.9,low:80},
+  {id:"i_straw",name:"หลอด",unit:"ชิ้น",stock:500,cost:0.35,low:80}
+];
+var DEFAULT_RECIPES={};
+
+/* ---------- storage ---------- */
+var _mem={};
+function lsGet(k){try{var v=localStorage.getItem(k);return v==null?null:JSON.parse(v)}catch(e){return _mem[k]!=null?_mem[k]:null}}
+function lsSet(k,v){_mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function loadMenu(){var s=lsGet("menu");if(s&&s.length)return s;return DEFAULT_MENU.map(function(m){return {id:m.id,name:m.name,cat:m.cat,price:m.price,active:true,track:false,stock:0}})}
+function loadOpts(){var s=lsGet("optgroups");if(s&&s.length)return s;return JSON.parse(JSON.stringify(DEFAULT_OPTS))}
+function loadIng(){var s=lsGet("ingredients");if(s&&s.length)return s;return JSON.parse(JSON.stringify(DEFAULT_ING))}
+function loadRec(){var s=lsGet("recipes");return s||JSON.parse(JSON.stringify(DEFAULT_RECIPES))}
+function loadStaff(){var s=lsGet("staff");return s||[]}
+function loadSettings(){return lsGet("settings")||{pp:"",shopName:"บ้านฟ้ากาแฟสด"}}
+/* ปุ่มลัดเหตุผลรายจ่าย — ค่าเริ่มต้นถ้ายังไม่ได้ตั้งเองที่หลังบ้าน (ตั้งค่า → ตั้งค่าร้าน) */
+var DEFAULT_CM_OUT=["ซื้อวัตถุดิบ/ของใช้ร้าน","ค่าขนส่ง/ค่าน้ำมัน","ค่าจิปาถะอื่นในร้าน"];
+function cmReasonList(){
+  var v=SETTINGS.cash_out_reasons;
+  return (v&&v.length)?v:DEFAULT_CM_OUT;
+}
+
+var P=loadMenu(),OPTG=loadOpts(),ING=loadIng(),REC=loadRec(),STAFF=loadStaff(),SETTINGS=loadSettings();
+function applyBranding(){
+  var name=(SETTINGS.shopName||"บ้านฟ้ากาแฟสด").trim()||"บ้านฟ้ากาแฟสด";
+  document.title=name+" — POS";
+  var els=document.querySelectorAll(".lgname,.logo .txt b");
+  for(var i=0;i<els.length;i++)els[i].textContent=name;
+}
+var AUTH_REFRESH=null,authBusy=false;
+var cart=[],activeCat="all",query="",payMethod="cash",discUnit="baht",syncing=false;
+var ME=null,AUTH_TOKEN=null,AUTH_REFRESH=null,authBusy=false;
+
+var $=function(s){return document.querySelector(s)};
+applyBranding();
+var baht=function(n){return "฿"+Number(Math.round(n*100)/100).toLocaleString("en-US")};
+var n2=function(n){return Math.round(n*100)/100};
+function findP(id){return P.find(function(x){return x.id===id})}
+function findI(id){return ING.find(function(x){return x.id===id})}
+function nextMenuId(){var m=0;P.forEach(function(p){if(p.id>m)m=p.id});return m+1}
+function applicableGroups(catId,itemId){return OPTG.filter(function(g){
+  return g.cats.indexOf(catId)>=0 && g.options.length
+    && (g.excludeItems||[]).indexOf(itemId)<0;   /* เมนูนี้ถูกยกเว้นจากกลุ่มนี้ไว้หรือเปล่า */
+})}
+function recipeOf(mid){return REC[String(mid)]||[]}
+function menuCost(mid){var c=0;recipeOf(mid).forEach(function(r){var i=findI(r.ing);if(i)c+=i.cost*r.qty});return c}
+
+/* ---------- toast / dialog ---------- */
+var toastT=null;
+function hasOn(el){
+  if(!el)return false;
+  var c=" "+el.className+" ";
+  return c.indexOf(" on ")>=0;          /* ต้องเป็นคลาส "on" จริงๆ ไม่ใช่ตัวอักษรในคำ */
+}
+function lockScroll(on){
+  var b=document.body;
+  var cls=b.className.replace(/\blocked\b/g,"").replace(/\s+/g," ").replace(/^\s|\s$/g,"");
+  b.className=on?(cls?cls+" locked":"locked"):cls;
+}
+function anyOverlayOpen(){
+  var ids=["login","pending","cashMove","openShift","closeShift","done","dlg","sheet","optSheet"];
+  for(var i=0;i<ids.length;i++){
+    if(hasOn(document.getElementById(ids[i])))return true;
+  }
+  return false;
+}
+setInterval(function(){lockScroll(anyOverlayOpen())},400);
+
+function toast(msg,kind){var t=$("#toast");t.textContent=msg;t.className="toast on"+(kind?(" "+kind):"");
+  if(toastT)clearTimeout(toastT);toastT=setTimeout(function(){t.className="toast"+(kind?(" "+kind):"")},2200)}
+var dlgCb=null;
+function askDlg(title,msg,opts,cb){
+  opts=opts||{};dlgCb=cb;
+  $("#dlgTitle").textContent=title;$("#dlgMsg").textContent=msg||"";
+  var inp=$("#dlgInput");
+  if(opts.input){inp.style.display="";inp.value=opts.value||"";inp.placeholder=opts.placeholder||""}else{inp.style.display="none"}
+  $("#dlgYes").className="yes"+(opts.safe?" safe":"");
+  $("#dlgYes").textContent=opts.yes||"ยืนยัน";
+  $("#dlg").className="dlg on";
+  if(opts.input)setTimeout(function(){inp.focus()},60);
+}
+function closeDlg(){$("#dlg").className="dlg";dlgCb=null}
+
+/* ---------- api ---------- */
+function cfgOk(){return !!(CONFIG.SUPABASE_URL&&CONFIG.SUPABASE_ANON)}
+function apiBase(){return CONFIG.SUPABASE_URL.replace(/\/+$/,"").replace(/\/rest\/v1$/,"")}
+function apiHeaders(extra){
+  var h={"apikey":CONFIG.SUPABASE_ANON,"Content-Type":"application/json"};
+  if(AUTH_TOKEN){h["Authorization"]="Bearer "+AUTH_TOKEN}
+  else if(CONFIG.SUPABASE_ANON.indexOf("eyJ")===0){h["Authorization"]="Bearer "+CONFIG.SUPABASE_ANON}
+  if(extra){for(var k in extra){h[k]=extra[k]}}
+  return h;
+}
+function authSignIn(cb){
+  if(!CONFIG.AUTH_EMAIL||!CONFIG.AUTH_PASSWORD){if(cb)cb(false);return}
+  fetch(apiBase()+"/auth/v1/token?grant_type=password",{method:"POST",
+    headers:{"apikey":CONFIG.SUPABASE_ANON,"Content-Type":"application/json"},
+    body:JSON.stringify({email:CONFIG.AUTH_EMAIL,password:CONFIG.AUTH_PASSWORD})})
+   .then(function(r){return r.json()})
+   .then(function(d){
+     if(d&&d.access_token){
+       AUTH_TOKEN=d.access_token;AUTH_REFRESH=d.refresh_token||null;
+       lsSet("auth_token",AUTH_TOKEN);lsSet("auth_refresh",AUTH_REFRESH);
+       if(cb)cb(true);
+     }else{if(cb)cb(false)}
+   })
+   .catch(function(){if(cb)cb(false)});
+}
+/* ต่ออายุ token — token ของ Supabase หมดอายุใน 1 ชม. ถ้าไม่ต่อจะขายไม่ได้ */
+function authRenew(cb){
+  if(authBusy){setTimeout(function(){cb(!!AUTH_TOKEN)},600);return}
+  authBusy=true;
+  var done=function(ok){authBusy=false;if(cb)cb(ok)};
+  if(AUTH_REFRESH){
+    fetch(apiBase()+"/auth/v1/token?grant_type=refresh_token",{method:"POST",
+      headers:{"apikey":CONFIG.SUPABASE_ANON,"Content-Type":"application/json"},
+      body:JSON.stringify({refresh_token:AUTH_REFRESH})})
+     .then(function(r){return r.json()})
+     .then(function(d){
+       if(d&&d.access_token){
+         AUTH_TOKEN=d.access_token;AUTH_REFRESH=d.refresh_token||AUTH_REFRESH;
+         lsSet("auth_token",AUTH_TOKEN);lsSet("auth_refresh",AUTH_REFRESH);done(true);
+       }else{authBusy=false;authSignIn(function(ok){done(ok)})}
+     })
+     .catch(function(){authBusy=false;authSignIn(function(ok){done(ok)})});
+  }else{authBusy=false;authSignIn(function(ok){done(ok)})}
+}
+/* ทุก request ผ่านตัวนี้ — เจอ 401 จะต่ออายุ token แล้วยิงซ้ำให้อัตโนมัติ 1 ครั้ง */
+function apiReq(url,init){
+  init=init||{};
+  return fetch(url,init).then(function(r){
+    if(r.status!==401||!CONFIG.AUTH_EMAIL)return r;
+    return new Promise(function(resolve){
+      authRenew(function(){
+        if(init.headers&&AUTH_TOKEN)init.headers["Authorization"]="Bearer "+AUTH_TOKEN;
+        resolve(fetch(url,init));
+      });
+    });
+  });
+}
+
+/* ---------- error messages (ไม่โชว์ raw error ให้ผู้ใช้) ---------- */
+var ERRMSG={0:"เชื่อมต่ออินเทอร์เน็ตไม่ได้",400:"ข้อมูลไม่ถูกต้อง",
+  401:"ไม่มีสิทธิ์เข้าถึงข้อมูล — แจ้งผู้ดูแลระบบ",403:"ไม่มีสิทธิ์เข้าถึงข้อมูล — แจ้งผู้ดูแลระบบ",
+  404:"ไม่พบข้อมูลที่ต้องการ",409:"ข้อมูลซ้ำ",500:"ระบบขัดข้องชั่วคราว กรุณาลองใหม่"};
+function friendlyErr(status,raw){
+  if(raw)try{console.error("[banfa]",status,raw)}catch(e){}
+  return ERRMSG[status]||ERRMSG[500];
+}
+function csvSafe(v){var t=String(v==null?"":v);return /^[=+\-@]/.test(t)?("'"+t):t}
+
+
+/* ---------- online-only send ---------- */
+function genId(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8)}
+function keepFailedSale(sale){
+  var f=lsGet("failed_sales")||[];
+  for(var i=0;i<f.length;i++){if(f[i].local_id===sale.local_id)return}  /* กันเก็บซ้ำ */
+  f.push(sale);if(f.length>200)f=f.slice(-200);lsSet("failed_sales",f);
+}
+function sendSale(sale,cb){
+  if(!cfgOk()){cb(false,"ยังไม่ได้ตั้งค่าระบบ");return}
+  apiReq(apiBase()+"/rest/v1/orders",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),body:JSON.stringify(sale)})
+   .then(function(res){
+     if(res.ok||res.status===409){cb(true);return}          /* 409 = บิลนี้เคยบันทึกแล้ว */
+     res.text().then(function(t){
+       keepFailedSale(sale);
+       cb(false,friendlyErr(res.status,t));
+     });
+   })
+   .catch(function(e){
+     keepFailedSale(sale);
+     cb(false,friendlyErr(0,e&&e.message));
+   });
+}
+function updateSyncUI(){
+  var chip=$("#syncChip");
+  var nf=(lsGet("failed_sales")||[]).length;
+  if(nf>0){chip.textContent="บิลค้าง "+nf+" ▸";chip.className="synced warn";
+    chip.style.cursor="pointer";chip.title="แตะเพื่อดูและส่งซ้ำ";return}
+  chip.style.cursor="";
+  if(!cfgOk()){chip.textContent="ยังไม่ตั้งค่า";chip.className="synced warn";return}
+  if(navigator.onLine===false){chip.textContent="ออฟไลน์";chip.className="synced warn"}
+  else{chip.textContent="ออนไลน์";chip.className="synced ok"}
+}
+
+/* ---------- config (cloud direct) ---------- */
+var CFG_KEYS={menu:function(){return P},optgroups:function(){return OPTG},
+  recipes:function(){return REC},settings:function(){return SETTINGS}};
+
+/* ยอดวัตถุดิบหน้าร้าน — อ่านจากตารางสต็อกจริง ไม่ใช่ app_config */
+function saveCfg(key,quiet){
+  lsSet(key,CFG_KEYS[key]());
+  if(!cfgOk())return;
+  apiReq(apiBase()+"/rest/v1/app_config?on_conflict=key",{method:"POST",
+    headers:apiHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
+    body:JSON.stringify({key:key,value:CFG_KEYS[key]()})})
+   .then(function(res){if(!res.ok&&!quiet)toast("บันทึกขึ้นระบบไม่สำเร็จ ("+res.status+")","err")})
+   .catch(function(){if(!quiet)toast("บันทึกขึ้นระบบไม่สำเร็จ — ไม่มีเน็ต","err")});
+}
+function seedDefaults(){
+  P=DEFAULT_MENU.map(function(m){return {id:m.id,name:m.name,cat:m.cat,price:m.price,active:true,track:false,stock:0}});
+  OPTG=JSON.parse(JSON.stringify(DEFAULT_OPTS));
+  ING=JSON.parse(JSON.stringify(DEFAULT_ING));
+}
+function loadConfigCloud(cb){
+  if(!cfgOk()){if(cb)cb(false);return}
+  apiReq(apiBase()+"/rest/v1/app_config?select=*",{headers:apiHeaders()})
+   .then(function(r){if(!r.ok)return r.text().then(function(x){throw new Error(r.status+" "+x)});return r.json()})
+   .then(function(list){
+     list.forEach(function(row){var v=row.value;if(!v)return;
+       if(row.key==="menu"&&v.length){P=v;lsSet("menu",P)}
+       if(row.key==="optgroups"&&v.length){OPTG=v;lsSet("optgroups",OPTG)}
+       if(row.key==="recipes"){REC=v;lsSet("recipes",REC)}
+       if(row.key==="settings"){SETTINGS=v;lsSet("settings",SETTINGS)}});
+     if(!P.length){seedDefaults();saveCfg("menu",true);saveCfg("ingredients",true);saveCfg("optgroups",true)}
+     applyBranding();renderCats();renderGrid();renderOrder();updateSyncUI();if(cb)cb(true);
+   })
+   .catch(function(e){updateSyncUI();toast("โหลดเมนูจากระบบไม่ได้ — "+String(e.message||e),"err");if(cb)cb(false)});
+}
+
+/* ---------- audit log (direct) ---------- */
+function logAct(action,detail){
+  var e={local_id:genId(),created_at:new Date().toISOString(),actor:ME?ME.name:"-",action:action,detail:detail||""};
+  var local=lsGet("audit_local")||[];local.unshift(e);if(local.length>200)local=local.slice(0,200);lsSet("audit_local",local);
+  if(!cfgOk())return;
+  apiReq(apiBase()+"/rest/v1/audit_log",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),body:JSON.stringify(e)}).catch(function(){});
+}
+
+
+/* ---------- cart math ---------- */
+var sub=function(){return cart.reduce(function(s,l){return s+l.unit*l.qty},0)};
+function discAmt(){var v=parseFloat($("#discInput").value)||0;return discUnit==="pct"?Math.min(sub()*v/100,sub()):Math.min(v,sub())}
+var total=function(){return Math.max(0,sub()-discAmt())};
+var count=function(){return cart.reduce(function(s,l){return s+l.qty},0)};
+
+/* ---------- stock availability ---------- */
+/* ---------- catalog ---------- */
+function renderCats(){
+  var all=[{id:"all"}].concat(CATS);
+  $("#cats").innerHTML=all.map(function(c){var nm=c.id==="all"?L().all:c.th;
+    return '<button class="cat '+(c.id===activeCat?"on":"")+'" data-cat="'+c.id+'">'+(c.id!=="all"?'<span class="dot" style="background:'+c.c+'"></span>':"")+nm+'</button>'}).join("");
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}
+function tileHTML(p){
+  return '<button class="tile" data-add="'+p.id+'">'+
+    '<div class="strip" style="background:'+catColor(p.cat)+'"></div>'+
+    '<span class="badge" id="badge-'+p.id+'">+1</span>'+
+    '<div class="in"><span class="nm">'+esc(p.name)+'</span>'+
+    '<span class="pr">'+baht(p.price)+'</span></div></button>';
+}
+function visibleItems(){
+  var q=query.trim().toLowerCase();
+  return P.filter(function(p){
+    if(p.active===false)return false;
+    if(q)return p.name.toLowerCase().indexOf(q)>=0;
+    return activeCat==="all"||p.cat===activeCat;
+  });
+}
+function renderGrid(){
+  var q=query.trim().toLowerCase();
+  var items=visibleItems();
+  var wrap=$("#gridWrap");
+  if(!items.length){
+    wrap.innerHTML='<div class="empty" style="padding:50px 20px"><p>ไม่พบเมนู</p></div>';
+    return;
+  }
+  var html="";
+  if(activeCat==="all"&&!q){
+    /* ดูทั้งหมด -> แยกหัวข้อตามหมวด อ่านง่ายกว่าเรียงรวด */
+    CATS.forEach(function(c){
+      var list=items.filter(function(p){return p.cat===c.id});
+      if(!list.length)return;
+      html+='<div class="secttl"><span class="dot" style="background:'+c.c+'"></span>'+c.th+
+            ' <span class="cnt2">'+list.length+'</span></div>'+
+            '<div class="grid">'+list.map(tileHTML).join("")+'</div>';
+    });
+  }else{
+    html='<div class="grid">'+items.map(tileHTML).join("")+'</div>';
+  }
+  wrap.innerHTML=html;
+}
+function optText(opts){return opts.map(function(o){return o.name+(o.price?(" +"+o.price):"")}).join(" · ")}
+function renderOrder(){
+  var c=count();
+  $("#orderCount").textContent=c?("· "+c+" "+L().items):"";
+  $("#clearBtn").style.display=c?"":"none";
+  var list=$("#orderList");
+  if(!cart.length){list.innerHTML='<div class="empty"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L23 7H6"/></svg><p>'+L().empty+'</p></div>'}
+  else{list.innerHTML=cart.map(function(l){
+    return '<div class="oline"><div class="oi"><div class="n">'+esc(l.name)+'</div>'+(l.opts.length?'<div class="opt">'+esc(optText(l.opts))+'</div>':'')+'<div class="p">'+baht(l.unit)+'</div></div>'+
+      '<div class="stepper"><button data-dec="'+l.uid+'">−</button><span class="q">'+l.qty+'</span><button data-inc="'+l.uid+'">+</button></div>'+
+      '<div class="amt">'+baht(l.unit*l.qty)+'</div></div>'}).join("")}
+  $("#subVal").textContent=baht(sub());$("#totVal").textContent=baht(total());
+  $("#chargeVal").textContent=c?("· "+baht(total())):"";$("#chargeBtn").disabled=!c;
+  var mb=$("#mobar");if($("#viewAdmin").style.display==="flex"){mb.className="mobar hide"}else{mb.className="mobar"+(c?"":" hide")}
+  $("#moCount").textContent=c+" "+L().items;$("#moTot").textContent=baht(total());
+}
+function pushLine(p,opts,qty){
+  var extra=opts.reduce(function(s,o){return s+o.price},0);
+  var unit=p.price+extra;var sig=p.id+"|"+opts.map(function(o){return o.name}).join(",");
+  var ex=cart.find(function(l){return l.sig===sig});
+  if(ex){ex.qty+=qty}else{cart.push({uid:genId(),id:p.id,name:p.name,base:p.price,opts:opts,unit:unit,qty:qty,sig:sig})}
+  renderOrder();
+}
+function addToCart(id){
+  var p=findP(id);if(!p||p.active===false)return;
+  var groups=applicableGroups(p.cat,p.id);
+  if(groups.length){openOptions(p,groups)}
+  else{var b=$("#badge-"+id);if(b){var t=b.parentNode;t.className="tile pop";setTimeout(function(){t.className="tile"},450)}pushLine(p,[],1)}
+}
+function chg(uid,d){var l=cart.find(function(x){return x.uid===uid});if(!l)return;l.qty+=d;if(l.qty<=0)cart=cart.filter(function(x){return x.uid!==uid});renderOrder()}
+
+/* ---------- option sheet ---------- */
+var optState=null;
+function openOptions(p,groups){
+  optState={p:p,groups:groups,sel:{},qty:1};
+  groups.forEach(function(g){optState.sel[g.id]=(g.type==="single"&&g.required)?[g.options[0]]:[]});
+  $("#optName").textContent=p.name;$("#optBase").textContent=baht(p.price);
+  renderOptBody();$("#optScrim").className="scrim on";$("#optSheet").className="sheet on";
+}
+function closeOptions(){$("#optScrim").className="scrim";$("#optSheet").className="sheet";optState=null}
+function optExtra(){var e=0;for(var gid in optState.sel){optState.sel[gid].forEach(function(o){e+=o.price})}return e}
+function renderOptBody(){
+  var h="";
+  optState.groups.forEach(function(g){
+    h+='<div class="ogroup"><div class="gt">'+esc(g.name)+(g.required?'<span class="req">*</span>':'<span class="multi">(ไม่บังคับ)</span>')+(g.type==="multi"?'<span class="multi">(เลือกได้หลายอย่าง)</span>':'')+'</div><div class="ogrid">';
+    g.options.forEach(function(o,i){
+      var on=optState.sel[g.id].some(function(s){return s.name===o.name});
+      h+='<button class="oopt '+(on?"on":"")+'" data-g="'+g.id+'" data-o="'+i+'">'+esc(o.name)+(o.price?('<span class="op">+'+o.price+'</span>'):'')+'</button>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="ogroup"><div class="gt">จำนวน</div><div class="oqty"><button id="oqMinus">−</button><span class="n">'+optState.qty+'</span><button id="oqPlus">+</button></div></div>';
+  $("#optBody").innerHTML=h;
+  $("#optTotal").textContent=baht((optState.p.price+optExtra())*optState.qty);
+  var okAll=true;optState.groups.forEach(function(g){if(g.required&&!optState.sel[g.id].length)okAll=false});
+  $("#optAdd").disabled=!okAll;
+  $("#oqMinus").addEventListener("click",function(){if(optState.qty>1){optState.qty--;renderOptBody()}});
+  $("#oqPlus").addEventListener("click",function(){optState.qty++;renderOptBody()});
+}
+function optPick(gid,oi){
+  var g=optState.groups.find(function(x){return x.id===gid});var o=g.options[oi];
+  if(g.type==="single"){var cur=optState.sel[gid][0];
+    if(cur&&cur.name===o.name&&!g.required){optState.sel[gid]=[]}else{optState.sel[gid]=[o]}}
+  else{var arr=optState.sel[gid];var idx=-1;for(var i=0;i<arr.length;i++){if(arr[i].name===o.name)idx=i}
+    if(idx>=0)arr.splice(idx,1);else arr.push(o)}
+  renderOptBody();
+}
+function confirmOptions(){
+  var bad=false;optState.groups.forEach(function(g){if(g.required&&!optState.sel[g.id].length)bad=true});if(bad)return;
+  var opts=[];optState.groups.forEach(function(g){optState.sel[g.id].forEach(function(o){opts.push({name:o.name,price:o.price,ing:o.ing||"",iqty:o.iqty||0,grp:g.id,grpName:g.name})})});
+  pushLine(optState.p,opts,optState.qty);closeOptions();
+}
+
+/* ---------- PromptPay QR ---------- */
+function pad2(n){n=String(n);while(n.length<2)n="0"+n;return n}
+function crc16(str){var c=0xFFFF;for(var i=0;i<str.length;i++){c^=str.charCodeAt(i)<<8;for(var j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}}var s=c.toString(16).toUpperCase();while(s.length<4)s="0"+s;return s}
+function tlvf(id,val){return id+pad2(val.length)+val}
+function ppPayload(target,amount){
+  var id=String(target).replace(/[^0-9]/g,"");var acc;
+  if(id.length>=13){acc=tlvf("00","A000000677010111")+tlvf("02",id.slice(0,13))}
+  else{acc=tlvf("00","A000000677010111")+tlvf("01","0066"+id.replace(/^0/,""))}
+  var p=tlvf("00","01")+tlvf("01","12")+tlvf("29",acc)+tlvf("53","764")+tlvf("54",amount.toFixed(2))+tlvf("58","TH")+"6304";
+  return p+crc16(p);
+}
+function renderPPQR(){
+  var box=$("#qrReal");box.innerHTML="";
+  if(!SETTINGS.pp){box.innerHTML='<div style="padding:16px;color:var(--muted);font-weight:600;text-align:center">ยังไม่ได้ตั้งเบอร์พร้อมเพย์<br>หลังบ้าน → ตั้งค่า</div>';$("#ppNote").innerHTML="";return}
+  if(!window.QRCode){box.innerHTML='<div style="padding:16px;color:var(--muted);font-weight:600;text-align:center">โหลดตัวสร้าง QR ไม่ได้ (ออฟไลน์)<br>รับเงินสดแทน</div>';$("#ppNote").innerHTML="";return}
+  new QRCode(box,{text:ppPayload(SETTINGS.pp,total()),width:210,height:210,correctLevel:QRCode.CorrectLevel.M});
+  $("#ppNote").innerHTML='<b>'+esc((SETTINGS.shopName||"บ้านฟ้ากาแฟสด").trim()||"บ้านฟ้ากาแฟสด")+'</b> · '+esc(SETTINGS.pp)+'<br>'+L().scan+' <b>'+baht(total())+'</b>';
+}
+
+/* ---------- payment ---------- */
+function openPay(){
+  if(!cart.length)return;
+  if(!SHIFT){
+    toast("กำลังตรวจสอบกะ…");
+    syncShiftFromServer(function(){
+      if(SHIFT){updateShiftUI();toast("เข้าร่วมกะที่เปิดอยู่ — กดชำระเงินอีกครั้ง","ok")}
+      else openShiftScreen();
+    });
+    return}
+  payMethod="cash";discUnit="baht";$("#discInput").value="";$("#tender").value="";
+  var segs=document.querySelectorAll(".seg button");for(var i=0;i<segs.length;i++){segs[i].className=segs[i].getAttribute("data-pm")==="cash"?"on":""}
+  var dus=document.querySelectorAll(".disc-row .u button");for(var j=0;j<dus.length;j++){dus[j].className=dus[j].getAttribute("data-du")==="baht"?"on":""}
+  setPane();syncPay();$("#scrim").className="scrim on";$("#sheet").className="sheet on";
+}
+function closePay(){$("#scrim").className="scrim";$("#sheet").className="sheet"}
+function setPane(){$("#cashPane").style.display=payMethod==="cash"?"":"none";$("#ppPane").style.display=payMethod==="pp"?"":"none";if(payMethod==="pp")renderPPQR()}
+function buildQuick(){$("#quick").innerHTML='<button data-q="'+total()+'">พอดี</button>'+[50,100,500].map(function(v){return '<button data-q="'+v+'">'+v+'</button>'}).join("")}
+function syncPay(){$("#payTot").textContent=baht(total());buildQuick();updateChange();
+  var d=discAmt();$("#discLine").style.display=d>0?"flex":"none";$("#discVal").textContent="-"+baht(d);
+  $("#totVal").textContent=baht(total());if(payMethod==="pp")renderPPQR()}
+function updateChange(){var r=parseFloat($("#tender").value)||0;var c=r-total();
+  $("#changeVal").textContent=baht(c>0?c:0);
+  $("#confirmBtn").disabled=!cart.length||(payMethod==="cash"&&r<total())}
+function orderCost(){var c=0;cart.forEach(function(l){c+=menuCost(l.id)*l.qty;
+  l.opts.forEach(function(o){if(o.ing&&o.iqty){var i=findI(o.ing);if(i)c+=i.cost*o.iqty*l.qty}})});return n2(c)}
+var payBusy=false;
+function confirmPay(){
+  if(payBusy)return;
+  var t=total();var r=parseFloat($("#tender").value)||0;
+  var sale={local_id:genId(),created_at:new Date().toISOString(),shift_id:(SHIFT?SHIFT.local_id:null),subtotal:n2(sub()),discount:n2(discAmt()),
+    total:n2(t),payment_method:payMethod,received:payMethod==="cash"?(r||t):null,
+    cost:orderCost(),staff:ME?ME.name:"-",
+    items:cart.map(function(l){return {id:l.id,name:l.name,price:l.unit,qty:l.qty,recipe:recipeOf(l.id),options:l.opts.map(function(o){return {name:o.name,ing:o.ing||"",iqty:o.iqty||0,grp:o.grp||"",grpName:o.grpName||""}})}})};
+  payBusy=true;var qbtn=$("#confirmBtn");qbtn.disabled=true;qbtn.textContent="กำลังบันทึก…";
+  sendSale(sale,function(ok,err){
+    payBusy=false;qbtn.disabled=false;qbtn.innerHTML='<span id="confirmLbl">ยืนยันการชำระ</span>';
+    /* ตัดสต็อกและนับเข้ากะ เฉพาะเมื่อบิลเข้าระบบสำเร็จเท่านั้น
+       ไม่งั้นพอขายซ้ำจะตัดสต็อกสองรอบ และยอดกะจะเกินจริง */
+    if(ok){
+      addToShift(sale);
+      if(n2(discAmt())>0)logAct("discount","ส่วนลด "+baht(discAmt())+" บิล "+baht(t));
+    }
+    closePay();
+    $("#doneAmt").textContent=baht(t);
+    var changeTxt=L().by(payMethod)+(payMethod==="cash"&&r>t?(" · "+L().change+" "+baht(r-t)):"");
+    if(ok){
+      $("#doneRing").className="ring";
+      $("#doneLbl").textContent="ชำระเงินสำเร็จ";
+      $("#doneSub").innerHTML=changeTxt+' <span class="pill ok" style="margin-left:6px">บันทึกขึ้นระบบแล้ว</span>';
+    }else{
+      $("#doneRing").className="ring bad";
+      $("#doneLbl").textContent="รับเงินแล้ว — แต่บันทึกไม่สำเร็จ";
+      $("#doneSub").innerHTML=changeTxt+'<br><span style="color:var(--danger);font-weight:800">บิลนี้ไม่เข้าระบบ กรุณาจดไว้เอง</span>'+
+        '<br><span style="font-size:13px;color:var(--muted)">สต็อกยังไม่ถูกตัด — ขายซ้ำได้เลย ไม่ตัดซ้ำ · บิลถูกเก็บไว้ในรายการบิลค้าง</span>'+
+        '<br><span style="font-size:12px;color:var(--faint)">'+esc(String(err||""))+'</span>';
+    }
+    $("#done").className="done on";
+  });
+}
+function newOrder(){cart=[];discUnit="baht";$("#discInput").value="";$("#done").className="done";renderGrid();renderOrder()}
+
+/* ---------- บิลค้าง (ส่งไม่สำเร็จ) ---------- */
+var pdBusy=false;
+function pendingList(){return lsGet("failed_sales")||[]}
+function openPending(){
+  renderPending();
+  $("#pending").className="sv on";
+  syncShiftFromServer(function(){renderPending()});   /* อัปเดตว่าจะเข้ากะไหน */
+}
+function renderPending(){
+  var f=pendingList();
+  var tot=0;f.forEach(function(x){tot+=Number(x.total)||0});
+  $("#pdSum").innerHTML=
+    '<div class="srow big"><span class="k">จำนวนบิลค้าง</span><span class="v">'+f.length+' บิล</span></div>'+
+    '<div class="srow big"><span class="k">มูลค่ารวม</span><span class="v" style="color:var(--danger)">'+baht(tot)+'</span></div>'+
+    (f.length?('<div class="hint">ยอดนี้<b>ยังไม่อยู่ในรายงาน</b> — ถ้าส่งซ้ำไม่สำเร็จ กรุณาจดไว้เอง<br>'+
+       (SHIFT?('บิลจะเข้า <b>กะที่เปิดอยู่ตอนนี้</b> ('+SHIFT.staff+' · เปิด '+
+         pad2(new Date(SHIFT.opened_at).getHours())+':'+pad2(new Date(SHIFT.opened_at).getMinutes())+' น.)')
+             :'<b>ยังไม่มีกะเปิดอยู่</b> — ระบบจะเปิดกะใหม่ให้อัตโนมัติตอนกดส่ง')+'</div>'):
+               '<div class="hint">ไม่มีบิลค้าง ทุกบิลเข้าระบบครบแล้ว</div>');
+  $("#pdList").innerHTML=f.length?f.slice().reverse().map(function(x){
+    var tm=new Date(x.created_at).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+    var names=(x.items||[]).map(function(i){return i.name+(i.qty>1?("×"+i.qty):"")}).join(", ");
+    return '<div class="srow" style="align-items:flex-start"><span class="k" style="flex:1;text-align:left">'+
+      '<b style="color:var(--ink)">'+tm+'</b><br><span style="font-size:12px">'+esc(names)+'</span><br>'+
+      '<span style="font-size:11px;color:var(--faint)">'+(x.payment_method==="cash"?"เงินสด":"พร้อมเพย์")+' · '+esc(x.staff||"-")+'</span></span>'+
+      '<span class="v">'+baht(x.total)+'</span></div>';
+  }).join(""):'<div style="color:var(--muted);font-weight:600;font-size:14px">ไม่มีบิลค้าง</div>';
+  $("#pdSend").disabled=!f.length;
+  $("#pdCsv").style.display=f.length?"":"none";
+  $("#pdClear").style.display=f.length?"":"none";
+}
+/* ให้แน่ใจว่ามีกะเปิดอยู่ — ถ้าไม่มีให้เปิดใหม่อัตโนมัติ */
+function ensureShift(cb){
+  syncShiftFromServer(function(){
+    if(SHIFT){cb(true);return}
+    if(!cfgOk()){cb(false);return}
+    var oc=Number(lsGet("last_opening_cash"))||0;
+    var ns={local_id:genId(),opened_at:new Date().toISOString(),staff:ME?ME.name:"-",
+      opening_cash:n2(oc),sales_total:0,sales_cash:0,sales_pp:0,bills:0,discount:0,cost:0,
+      voids:0,items:{},cash:[],cash_in:0,cash_out:0};
+    apiReq(apiBase()+"/rest/v1/shifts",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),
+      body:JSON.stringify({local_id:ns.local_id,opened_at:ns.opened_at,staff:ns.staff,
+        opening_cash:ns.opening_cash,status:"open"})})
+     .then(function(r){
+       if(r.ok){SHIFT=ns;saveShift();updateShiftUI();
+         logAct("shift_open_auto","เปิดกะอัตโนมัติเพื่อรับบิลค้าง");
+         toast("เปิดกะใหม่อัตโนมัติเพื่อรับบิลค้าง","ok");cb(true)}
+       else cb(false);
+     })
+     .catch(function(){cb(false)});
+  });
+}
+
+function resendPending(){
+  if(pdBusy)return;
+  var f=pendingList();
+  if(!f.length){toast("ไม่มีบิลค้าง","ok");return}
+  if(!cfgOk()){toast("ยังไม่ได้ตั้งค่าระบบ","err");return}
+  pdBusy=true;
+  var btn=$("#pdSend");btn.disabled=true;btn.textContent="กำลังเตรียมกะ…";
+  var i=0,ok=0,fail=0;
+  var next=function(){
+    if(i>=f.length){
+      var left=[];
+      for(var k=0;k<f.length;k++){if(f[k].__failed)left.push(f[k])}
+      left.forEach(function(x){delete x.__failed});
+      lsSet("failed_sales",left);
+      pdBusy=false;btn.disabled=false;btn.textContent="ส่งซ้ำทั้งหมด";
+      updateSyncUI();renderPending();
+      if(fail===0){toast("ส่งครบ "+ok+" บิลแล้ว","ok");logAct("resend_sales","ส่งซ้ำสำเร็จ "+ok+" บิล")}
+      else{toast("สำเร็จ "+ok+" · ยังค้าง "+fail,"err")}
+      if(SHIFT)refreshShiftTotals();
+      return;
+    }
+    var sale=f[i];btn.textContent="กำลังส่ง "+(i+1)+"/"+f.length+"…";
+    var body={};for(var key in sale){if(key.indexOf("__")!==0)body[key]=sale[key]}
+    var origShift=sale.shift_id,curShift=SHIFT?SHIFT.local_id:null;
+    body.shift_id=curShift;      /* ผูกเข้ากะที่เปิดอยู่ตอนนี้ */
+    if(origShift&&curShift&&origShift!==curShift){
+      logAct("resend_shift_mismatch","บิลค้างสร้างในกะ "+origShift+" แต่ถูกส่งซ้ำเข้ากะ "+curShift);
+    }
+    apiReq(apiBase()+"/rest/v1/orders",{method:"POST",
+      headers:apiHeaders({"Prefer":"return=minimal"}),body:JSON.stringify(body)})
+     .then(function(r){
+       if(r.ok||r.status===409){ok++}
+       else{fail++;sale.__failed=true}
+       i++;next();
+     })
+     .catch(function(){fail++;sale.__failed=true;i++;next()});
+  };
+  ensureShift(function(hasShift){
+    if(!hasShift){
+      pdBusy=false;btn.disabled=false;btn.textContent="ส่งซ้ำทั้งหมด";
+      toast("เปิดกะไม่สำเร็จ — ลองใหม่อีกครั้ง","err");return;
+    }
+    next();
+  });
+}
+/* ตัดสต็อกให้บิลที่เพิ่งส่งสำเร็จ (ตอนขายจริงยังไม่ได้ตัดเพราะบันทึกไม่ผ่าน) */
+/* บิลที่ส่งซ้ำเก็บตัวเลือกไว้แค่ "ชื่อ" (string) ไม่ใช่ข้อมูลเต็มแบบตอนขายสด
+   ต้องย้อนหาว่าชื่อนี้ผูกกับวัตถุดิบอะไรจากกลุ่มตัวเลือกปัจจุบัน */
+function exportPending(){
+  var f=pendingList();if(!f.length)return;
+  var rows=[["วันเวลา","พนักงาน","รายการ","ยอด","ช่องทาง"]];
+  f.forEach(function(x){rows.push([new Date(x.created_at).toLocaleString("th-TH"),x.staff||"-",
+    (x.items||[]).map(function(i){return i.name+"x"+i.qty}).join(" / "),x.total,
+    x.payment_method==="cash"?"เงินสด":"พร้อมเพย์"])});
+  var csv="\uFEFF"+rows.map(function(r){return r.map(function(c){return '"'+csvSafe(c).replace(/"/g,'""')+'"'}).join(",")}).join("\n");
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="บิลค้าง_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+  toast("ส่งออกแล้ว","ok");
+}
+
+/* ---------- SHIFT (เปิด/ปิดกะ) ---------- */
+var SHIFT=null,shiftSyncing=false;
+function loadShift(){var v=lsGet("shift");SHIFT=v||null}
+function saveShift(){lsSet("shift",SHIFT)}
+
+/* หากะที่ยังเปิดอยู่ของร้าน (ไม่ใช่ของเครื่องนี้) แล้วเข้าร่วมกะนั้น */
+function syncShiftFromServer(cb){
+  if(!cfgOk()){if(cb)cb();return}
+  apiReq(apiBase()+"/rest/v1/shifts?select=*&status=eq.open&order=opened_at.desc&limit=1",
+    {headers:apiHeaders()})
+   .then(function(r){if(!r.ok)throw 0;return r.json()})
+   .then(function(list){
+     if(!list.length){                       /* เซิร์ฟเวอร์ไม่มีกะเปิด */
+       if(SHIFT){SHIFT=null;lsSet("shift",null)}   /* กะในเครื่องค้างอยู่ = ถูกปิดจากที่อื่นแล้ว */
+       updateShiftUI();if(cb)cb();return;
+     }
+     var srv=list[0];
+     if(!SHIFT||SHIFT.local_id!==srv.local_id){
+       SHIFT={local_id:srv.local_id,opened_at:srv.opened_at,staff:srv.staff,
+         opening_cash:Number(srv.opening_cash)||0,
+         sales_total:0,sales_cash:0,sales_pp:0,bills:0,discount:0,cost:0,voids:0,
+         items:{},cash:[],cash_in:0,cash_out:0};
+     }
+     saveShift();
+     refreshShiftTotals(cb);
+   })
+   .catch(function(){updateShiftUI();if(cb)cb()});
+}
+
+/* คำนวณยอดกะจากบิลจริงบนเซิร์ฟเวอร์ — ทุกเครื่องเห็นตัวเลขเดียวกัน */
+function refreshShiftTotals(cb){
+  if(!SHIFT||!cfgOk()||shiftSyncing){if(cb)cb();return}
+  shiftSyncing=true;
+  var sid=encodeURIComponent(SHIFT.local_id);
+  apiReq(apiBase()+"/rest/v1/orders?select=total,cost,discount,payment_method,status,items&shift_id=eq."+sid+"&limit=3000",
+    {headers:apiHeaders()})
+   .then(function(r){if(!r.ok)throw 0;return r.json()})
+   .then(function(rows){
+     var ok=rows.filter(function(o){return o.status!=="void"});
+     SHIFT.sales_total=0;SHIFT.sales_cash=0;SHIFT.sales_pp=0;
+     SHIFT.bills=ok.length;SHIFT.discount=0;SHIFT.cost=0;SHIFT.items={};
+     SHIFT.voids=rows.length-ok.length;
+     ok.forEach(function(o){
+       var t=Number(o.total)||0;
+       SHIFT.sales_total=n2(SHIFT.sales_total+t);
+       if(o.payment_method==="cash")SHIFT.sales_cash=n2(SHIFT.sales_cash+t);
+       else SHIFT.sales_pp=n2(SHIFT.sales_pp+t);
+       SHIFT.discount=n2(SHIFT.discount+(Number(o.discount)||0));
+       SHIFT.cost=n2(SHIFT.cost+(Number(o.cost)||0));
+       (o.items||[]).forEach(function(it){
+         if(!SHIFT.items[it.name])SHIFT.items[it.name]={q:0,a:0};
+         SHIFT.items[it.name].q+=it.qty;SHIFT.items[it.name].a+=it.price*it.qty;});
+     });
+     return apiReq(apiBase()+"/rest/v1/cash_movements?select=*&shift_id=eq."+sid+"&limit=500",
+       {headers:apiHeaders()});
+   })
+   .then(function(r){return r&&r.ok?r.json():[]})
+   .then(function(cm){
+     SHIFT.cash=[];SHIFT.cash_in=0;SHIFT.cash_out=0;
+     (cm||[]).forEach(function(c){
+       SHIFT.cash.push({local_id:c.local_id,at:c.created_at,dir:c.direction,
+         amount:Number(c.amount)||0,reason:c.reason||""});
+       if(c.direction==="in")SHIFT.cash_in=n2(SHIFT.cash_in+Number(c.amount));
+       else SHIFT.cash_out=n2(SHIFT.cash_out+Number(c.amount));
+     });
+     shiftSyncing=false;saveShift();updateShiftUI();if(cb)cb();
+   })
+   .catch(function(){shiftSyncing=false;updateShiftUI();if(cb)cb()});
+}
+function shiftLabel(){
+  if(!SHIFT)return "";
+  var t=new Date(SHIFT.opened_at);
+  var who=(SHIFT.staff&&ME&&SHIFT.staff!==ME.name)?(" · เปิดโดย "+SHIFT.staff):"";
+  return "กะ "+pad2(t.getHours())+":"+pad2(t.getMinutes())+" น."+who;
+}
+function updateShiftUI(){
+  var info=$("#shiftInfo"),btn=$("#shiftBtn");
+  if(!ME){info.textContent="";btn.style.display="none";return}
+  btn.style.display="";
+  var cb=$("#cashBtn");if(cb)cb.style.display=SHIFT?"":"none";
+  if(SHIFT){info.textContent=shiftLabel();btn.className="shiftbtn";btn.textContent="ปิดกะ"}
+  else{info.textContent="";btn.className="shiftbtn warn";btn.textContent="เปิดกะ"}
+}
+function openShiftScreen(){
+  $("#osWho").textContent=(ME?ME.name:"")+" · "+new Date().toLocaleDateString("th-TH",{weekday:"long",day:"numeric",month:"long"});
+  $("#osCash").value=String(lsGet("last_opening_cash")||2000);
+  $("#openShift").className="sv on";
+}
+function startShift(){
+  var c=parseFloat($("#osCash").value);
+  if(isNaN(c)||c<0){toast("กรอกเงินทอนตั้งต้น","err");return}
+  var btn=$("#osStart");btn.disabled=true;btn.textContent="กำลังเปิดกะ…";
+  var reset=function(){btn.disabled=false;btn.textContent="เปิดกะ เริ่มขาย"};
+
+  /* กันเปิดซ้ำ: ถ้ามีกะเปิดค้างอยู่แล้ว ให้เข้าร่วมกะนั้นแทน */
+  syncShiftFromServer(function(){
+    if(SHIFT){
+      reset();$("#openShift").className="sv";updateShiftUI();
+      toast("เข้าร่วมกะที่เปิดอยู่แล้ว (เปิดโดย "+SHIFT.staff+")","ok");
+      return;
+    }
+    var ns={local_id:genId(),opened_at:new Date().toISOString(),staff:ME?ME.name:"-",
+      opening_cash:n2(c),sales_total:0,sales_cash:0,sales_pp:0,bills:0,discount:0,cost:0,
+      voids:0,items:{},cash:[],cash_in:0,cash_out:0};
+    if(!cfgOk()){
+      SHIFT=ns;lsSet("last_opening_cash",n2(c));saveShift();
+      reset();$("#openShift").className="sv";updateShiftUI();
+      toast("เปิดกะแล้ว (ออฟไลน์)","err");return;
+    }
+    apiReq(apiBase()+"/rest/v1/shifts",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),
+      body:JSON.stringify({local_id:ns.local_id,opened_at:ns.opened_at,staff:ns.staff,
+        opening_cash:ns.opening_cash,status:"open"})})
+     .then(function(r){
+       reset();
+       if(!r.ok){toast("เปิดกะไม่สำเร็จ ลองใหม่","err");return}
+       SHIFT=ns;lsSet("last_opening_cash",n2(c));saveShift();
+       logAct("shift_open","เปิดกะ เงินทอนตั้งต้น "+baht(c));
+       $("#openShift").className="sv";updateShiftUI();
+       toast("เปิดกะแล้ว — เริ่มขายได้","ok");
+     })
+     .catch(function(){reset();toast("เปิดกะไม่สำเร็จ — ไม่มีเน็ต","err")});
+  });
+}
+function addToShift(sale){
+  if(!SHIFT)return;
+  setTimeout(function(){refreshShiftTotals()},800);   /* ดึงยอดจริงมาทับ กันตัวเลขต่างกันข้ามเครื่อง */
+  SHIFT.sales_total=n2(SHIFT.sales_total+sale.total);
+  if(sale.payment_method==="cash")SHIFT.sales_cash=n2(SHIFT.sales_cash+sale.total);
+  else SHIFT.sales_pp=n2(SHIFT.sales_pp+sale.total);
+  SHIFT.bills++;SHIFT.discount=n2(SHIFT.discount+(sale.discount||0));SHIFT.cost=n2(SHIFT.cost+(sale.cost||0));
+  (sale.items||[]).forEach(function(it){
+    if(!SHIFT.items[it.name])SHIFT.items[it.name]={q:0,a:0};
+    SHIFT.items[it.name].q+=it.qty;SHIFT.items[it.name].a+=it.price*it.qty});
+  saveShift();updateShiftUI();
+}
+function renderCmChips(){
+  var list=cmReasonList();
+  var h=list.map(function(r){
+    return '<button class="chip" data-cmr="'+esc(r)+'">'+esc(r)+'</button>'}).join("");
+  h+='<button class="chip" data-cmr="__other__">อื่นๆ</button>';
+  $("#cmChips").innerHTML=h;
+  $("#cmReason").style.display="none";
+}
+function openCashMove(){
+  if(!SHIFT){toast("ต้องเปิดกะก่อน","err");return}
+  $("#cmAmt").value="";$("#cmReason").value="";
+  renderCmChips();
+  renderCmList();
+  $("#cashMove").className="sv on";
+}
+function renderCmList(){
+  var list=(SHIFT&&SHIFT.cash)?SHIFT.cash:[];
+  $("#cmList").innerHTML=list.length?list.slice().reverse().map(function(c){
+    return '<div class="srow"><span class="k">'+new Date(c.at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+
+      ' · '+esc(c.reason)+'</span><span class="v" style="color:'+(c.dir==="in"?"var(--success)":"var(--danger)")+'">'+
+      (c.dir==="in"?"+":"−")+baht(c.amount)+'</span></div>'}).join(""):
+    '<div style="color:var(--muted);font-weight:600;font-size:14px">ยังไม่มีรายการ</div>';
+}
+function saveCashMove(){
+  var amt=parseFloat($("#cmAmt").value)||0;
+  var reason=$("#cmReason").value.trim();
+  if(amt<=0){toast("ใส่จำนวนเงิน","err");return}
+  if(!reason){toast("ต้องระบุเหตุผล","err");$("#cmReason").focus();return}
+  var rec={local_id:genId(),at:new Date().toISOString(),dir:"out",amount:n2(amt),reason:reason};
+  if(!SHIFT.cash)SHIFT.cash=[];
+  SHIFT.cash.push(rec);
+  SHIFT.cash_out=n2((SHIFT.cash_out||0)+amt);
+  saveShift();
+  if(cfgOk()){
+    apiReq(apiBase()+"/rest/v1/cash_movements",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),
+      body:JSON.stringify({local_id:rec.local_id,shift_id:SHIFT.local_id,direction:"out",
+        amount:rec.amount,reason:reason,actor:ME?ME.name:"-"})}).catch(function(){});
+  }
+  logAct("cash_out",baht(amt)+" — "+reason);
+  $("#cmAmt").value="";$("#cmReason").value="";
+  renderCmList();updateShiftUI();setTimeout(function(){refreshShiftTotals(renderCmList)},700);
+  toast("บันทึกรายจ่าย "+baht(amt),"ok");
+}
+function closeShiftScreen(){
+  if(!SHIFT)return;
+  $("#closeShift").className="sv on";
+  $("#csSummary").innerHTML='<div class="srow"><span class="k">กำลังดึงยอดล่าสุด…</span></div>';
+  refreshShiftTotals(function(){if(SHIFT)paintCloseShift()});
+}
+function paintCloseShift(){
+  var t=new Date(SHIFT.opened_at);
+  $("#csWho").textContent=SHIFT.staff+" · เปิดกะ "+pad2(t.getHours())+":"+pad2(t.getMinutes())+" น. · ปิด "+pad2(new Date().getHours())+":"+pad2(new Date().getMinutes())+" น.";
+  var profit=n2(SHIFT.sales_total-SHIFT.cost);
+  var avg=SHIFT.bills>0?SHIFT.sales_total/SHIFT.bills:0;
+  $("#csSummary").innerHTML=
+    '<div class="srow big"><span class="k">ยอดขายรวม</span><span class="v">'+baht(SHIFT.sales_total)+'</span></div>'+
+    '<div class="srow"><span class="k">จำนวนบิล</span><span class="v">'+SHIFT.bills+' บิล</span></div>'+
+    '<div class="srow"><span class="k">เฉลี่ยต่อบิล</span><span class="v">'+baht(avg)+'</span></div>'+
+    '<div class="srow"><span class="k">เงินสด</span><span class="v">'+baht(SHIFT.sales_cash)+'</span></div>'+
+    '<div class="srow"><span class="k">พร้อมเพย์</span><span class="v">'+baht(SHIFT.sales_pp)+'</span></div>'+
+    '<div class="srow"><span class="k">ส่วนลดที่ให้</span><span class="v">'+baht(SHIFT.discount)+'</span></div>'+
+    '<div class="srow"><span class="k">ต้นทุนวัตถุดิบ</span><span class="v">'+baht(SHIFT.cost)+'</span></div>'+
+    '<div class="srow tot"><span class="k">กำไรขั้นต้น</span><span class="v" style="color:var(--success)">'+baht(profit)+'</span></div>';
+  var names=Object.keys(SHIFT.items);
+  names.sort(function(a,b){return SHIFT.items[b].q-SHIFT.items[a].q});
+  $("#csTop").innerHTML=names.length?names.slice(0,8).map(function(k){
+    return '<div class="topitem"><span>'+esc(k)+'</span><span><b>'+SHIFT.items[k].q+'</b> · '+baht(SHIFT.items[k].a)+'</span></div>'}).join(""):'<div style="color:var(--muted);font-weight:600;font-size:14px">ยังไม่มีการขายในกะนี้</div>';
+  $("#csOpen").textContent=baht(SHIFT.opening_cash);
+  $("#csCash").textContent=baht(SHIFT.sales_cash);
+  var extraRow=document.getElementById("csExtra");
+  if(!extraRow){
+    var host=$("#csExpect").parentNode.parentNode;
+    var d=document.createElement("div");d.id="csExtra";
+    host.insertBefore(d,$("#csExpect").parentNode);
+  }
+  document.getElementById("csExtra").innerHTML=
+    ((SHIFT.cash_in||0)?'<div class="srow"><span class="k">+ เงินใส่เพิ่ม</span><span class="v" style="color:var(--success)">+'+baht(SHIFT.cash_in)+'</span></div>':'')+
+    ((SHIFT.cash_out||0)?'<div class="srow"><span class="k">− เงินหยิบออก</span><span class="v" style="color:var(--danger)">-'+baht(SHIFT.cash_out)+'</span></div>':'');
+  $("#csExpect").textContent=baht(expectedCash());
+  $("#csCounted").value="";
+  $("#csqAmt").value="";$("#csqReason").value="";
+  $("#csQuickExp").style.display="none";
+  updateDiff();
+}
+function expectedCash(){return n2(SHIFT.opening_cash+SHIFT.sales_cash+(SHIFT.cash_in||0)-(SHIFT.cash_out||0))}
+function updateDiff(){
+  var box=$("#csDiff");var raw=$("#csCounted").value;var q=$("#csQuickExp");
+  if(raw===""){box.className="diffbox neutral";box.innerHTML='<div class="k">ผลต่าง</div><div class="v">—</div>';if(q)q.style.display="none";return}
+  var d=n2((parseFloat(raw)||0)-expectedCash());
+  if(d===0){box.className="diffbox ok";box.innerHTML='<div class="k">ตรงพอดี</div><div class="v">'+baht(0)+'</div>';if(q)q.style.display="none"}
+  else if(d>0){box.className="diffbox ok";box.innerHTML='<div class="k">เงินเกิน</div><div class="v">+'+baht(d)+'</div>';if(q)q.style.display="none"}
+  else{
+    box.className="diffbox bad";box.innerHTML='<div class="k">เงินขาด</div><div class="v">'+baht(d)+'</div>';
+    if(q){if(q.style.display==="none"||!q.style.display)renderCsqChips();q.style.display="block"}
+  }
+}
+function renderCsqChips(){
+  var list=cmReasonList();
+  var h=list.map(function(r){
+    return '<button class="chip" data-csqr="'+esc(r)+'">'+esc(r)+'</button>'}).join("");
+  h+='<button class="chip" data-csqr="__other__">อื่นๆ</button>';
+  $("#csqChips").innerHTML=h;
+  $("#csqReason").style.display="none";
+}
+function saveQuickExpense(){
+  if(!SHIFT)return;
+  var amt=parseFloat($("#csqAmt").value)||0;
+  var reason=$("#csqReason").value.trim();
+  if(amt<=0){toast("ใส่จำนวนเงิน","err");return}
+  if(!reason){toast("ต้องระบุเหตุผล","err");$("#csqReason").focus();return}
+  var rec={local_id:genId(),at:new Date().toISOString(),dir:"out",amount:n2(amt),reason:reason};
+  if(!SHIFT.cash)SHIFT.cash=[];
+  SHIFT.cash.push(rec);
+  SHIFT.cash_out=n2((SHIFT.cash_out||0)+amt);
+  saveShift();
+  if(cfgOk()){
+    apiReq(apiBase()+"/rest/v1/cash_movements",{method:"POST",headers:apiHeaders({"Prefer":"return=minimal"}),
+      body:JSON.stringify({local_id:rec.local_id,shift_id:SHIFT.local_id,direction:"out",
+        amount:rec.amount,reason:reason,actor:ME?ME.name:"-"})}).catch(function(){});
+  }
+  logAct("cash_out",baht(amt)+" — "+reason);
+  $("#csqAmt").value="";$("#csqReason").value="";
+  updateShiftUI();
+  refreshCloseShiftMoney();
+  toast("บันทึกรายจ่าย "+baht(amt),"ok");
+}
+function refreshCloseShiftMoney(){
+  var ex=document.getElementById("csExtra");
+  if(ex)ex.innerHTML=
+    ((SHIFT.cash_in||0)?'<div class="srow"><span class="k">+ เงินใส่เพิ่ม</span><span class="v" style="color:var(--success)">+'+baht(SHIFT.cash_in)+'</span></div>':'')+
+    ((SHIFT.cash_out||0)?'<div class="srow"><span class="k">− เงินหยิบออก</span><span class="v" style="color:var(--danger)">-'+baht(SHIFT.cash_out)+'</span></div>':'');
+  $("#csExpect").textContent=baht(expectedCash());
+  updateDiff();
+}
+function confirmCloseShift(){
+  var raw=$("#csCounted").value;
+  if(raw===""){toast("กรอกเงินที่นับได้จริงก่อน","err");$("#csCounted").focus();return}
+  var counted=n2(parseFloat(raw)||0);
+  var exp=expectedCash();var diff=n2(counted-exp);
+  var msg=diff===0?"เงินตรงพอดี":(diff>0?("เงินเกิน "+baht(diff)):("เงินขาด "+baht(Math.abs(diff))));
+  askDlg("ยืนยันปิดกะ",msg+" · ยอดขาย "+baht(SHIFT.sales_total)+" ("+SHIFT.bills+" บิล)\nปิดแล้วจะเริ่มกะใหม่ ขายต่อได้",{yes:"ปิดกะ"},function(){
+    var body={closed_at:new Date().toISOString(),closed_by:ME?ME.name:"-",
+      counted_cash:counted,expected_cash:exp,diff:diff,
+      sales_total:SHIFT.sales_total,sales_cash:SHIFT.sales_cash,sales_pp:SHIFT.sales_pp,
+      bills:SHIFT.bills,discount:SHIFT.discount,cost:SHIFT.cost,
+      cash_in:SHIFT.cash_in||0,cash_out:SHIFT.cash_out||0,status:"closed"};
+    if(cfgOk()){
+      /* upsert: ถ้าแถวยังไม่มี (ตอนเปิดกะเน็ตล่ม) จะสร้างใหม่ให้ ไม่ทำให้กะหาย */
+      body.local_id=SHIFT.local_id;
+      body.opened_at=SHIFT.opened_at;
+      body.staff=SHIFT.staff;
+      body.opening_cash=SHIFT.opening_cash;
+      apiReq(apiBase()+"/rest/v1/shifts?on_conflict=local_id",
+        {method:"POST",headers:apiHeaders({"Prefer":"resolution=merge-duplicates,return=minimal"}),
+         body:JSON.stringify(body)})
+       .then(function(r){if(!r.ok)r.text().then(function(x){toast(friendlyErr(r.status,x),"err")})})
+       .catch(function(){toast("บันทึกกะขึ้นระบบไม่สำเร็จ — ไม่มีเน็ต","err")});
+    }
+    logAct("shift_close","ปิดกะ ยอด "+baht(SHIFT.sales_total)+" · "+msg);
+    SHIFT=null;lsSet("shift",null);
+    $("#closeShift").className="sv";updateShiftUI();
+    toast("ปิดกะแล้ว — เปิดกะใหม่เพื่อขายต่อ","ok");
+    openShiftScreen();
+  });
+}
+
+/* ---------- login / staff ---------- */
+var pinBuf="";
+function currentStaffId(){return lsGet("staff_id")}
+function renderDots(){var d=$("#pinDots");var n=pinBuf.length;var mx=Math.max(n,4);var h="";for(var i=0;i<mx;i++){h+='<i class="'+(i<n?"f":"")+'"></i>'}d.innerHTML=h}
+function applyRole(){
+  var a=ME&&ME.role==="admin";
+  $("#navAdmin").style.display=a?"":"none";
+  $("#navSell").className="on";
+  $("#roleAv").textContent=ME?String(ME.name).charAt(0).toUpperCase():"?";
+  $("#cashierLbl").textContent=ME?(ME.name+(a?" · แอดมิน":"")):"—";
+  if(!a)showView("sell");
+}
+function applyLoginResult(st){
+  ME={id:st.id,name:st.name,role:st.role};
+  lsSet("staff_id",ME.id);lsSet("staff_cache",ME);
+  $("#login").className="login";applyRole();
+  logAct("login","เข้าระบบ");toast("สวัสดี "+ME.name,"ok");
+  updateShiftUI();
+  syncShiftFromServer(function(){
+    if(!SHIFT)setTimeout(openShiftScreen,350);
+  });
+}
+function doLogin(pin,cb){
+  if(!cfgOk()){cb(false,"ยังไม่ได้ตั้งค่าระบบ");return}
+  apiReq(apiBase()+"/rest/v1/rpc/verify_pin",{method:"POST",headers:apiHeaders(),
+    body:JSON.stringify({p_pin:String(pin)})})
+   .then(function(r){if(!r.ok)return r.text().then(function(t){throw {s:r.status,t:t}});return r.json()})
+   .then(function(list){
+     if(list&&list.length){applyLoginResult(list[0]);cb(true)}
+     else cb(false,"PIN ไม่ถูกต้อง");
+   })
+   .catch(function(e){cb(false,friendlyErr(e&&e.s?e.s:0,e&&e.t))});
+}
+function logout(){logAct("logout","ออกจากระบบ");ME=null;lsSet("staff_id",null);lsSet("staff_cache",null);updateShiftUI();showView("sell");pinBuf="";renderDots();$("#login").className="login on"}
+function keypad(k){
+  $("#lgErr").textContent="";
+  if(k==="clear"){pinBuf="";renderDots();return}
+  if(k==="back"){pinBuf=pinBuf.slice(0,-1);renderDots();return}
+  if(k==="enter"){
+    if(pinBuf.length<4){$("#lgErr").textContent="PIN อย่างน้อย 4 หลัก";return}
+    $("#lgErr").textContent="กำลังตรวจสอบ…";
+    var tried=pinBuf;pinBuf="";renderDots();
+    doLogin(tried,function(ok,msg){if(!ok)$("#lgErr").textContent=msg;else $("#lgErr").textContent=""});
+    return}
+  if(pinBuf.length<8){pinBuf+=k;renderDots()}
+}
+
+/* ---------- views ---------- */
+var adminTab="reports";
+function showView(v){
+  if(v==="admin"){openAdmin();return}
+  $("#navSell").className="on";
+  $("#viewSell").style.display="flex";
+  var va=$("#viewAdmin");if(va)va.style.display="none";
+  renderGrid();renderOrder();
+}
+var TABS=[["reports","tabReports","paneReports"],["menu","tabMenu","paneMenu"],["recipe","tabRecipe","paneRecipe"],
+  ["ing","tabIng","paneIng"],["options","tabOptions","paneOptions"],["staff","tabStaff","paneStaff"],
+  ["audit","tabAudit","paneAudit"],["settings","tabSettings","paneSettings"]];
+function showAdminTab(t){
+  adminTab=t;
+  TABS.forEach(function(a){$("#"+a[1]).className=a[0]===t?"on":"";$("#"+a[2]).style.display=a[0]===t?"block":"none"});
+  if(t==="reports"){if(!$("#repFrom").value){setRange(0)}loadReports()}
+  if(t==="menu")renderMenuAdmin();
+  if(t==="recipe")renderRecipeAdmin();
+  if(t==="options")renderOptAdmin();
+  if(t==="staff")renderStaffAdmin();
+  if(t==="audit")renderAuditAdmin();
+  if(t==="settings")renderSettingsAdmin();
+}
+
+/* ---------- reports ---------- */
+function dstr(d){return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
+function todayStr(){return dstr(new Date())}
+function setRange(days){
+  var to=new Date(),from=new Date();
+  if(days===1){to.setDate(to.getDate()-1);from.setDate(from.getDate()-1)}
+  else if(days>1){from.setDate(from.getDate()-(days-1))}
+  $("#repFrom").value=dstr(from);$("#repTo").value=dstr(to);
+}
+var lastRows=[];
+function loadReports(){
+  var body=$("#repBody");
+  if(!cfgOk()){body.innerHTML='<div class="repmsg">ยังไม่ได้ตั้งค่า Supabase</div>';return}
+  body.innerHTML='<div class="repmsg">กำลังโหลด…</div>';
+  var f=$("#repFrom").value||todayStr(),t=$("#repTo").value||todayStr();
+  var start=new Date(f+"T00:00:00");var end=new Date(t+"T00:00:00");end.setDate(end.getDate()+1);
+  var url=apiBase()+"/rest/v1/orders?select=*&created_at=gte."+encodeURIComponent(start.toISOString())+
+    "&created_at=lt."+encodeURIComponent(end.toISOString())+"&order=created_at.desc&limit=2000";
+  fetch(url,{headers:apiHeaders()})
+   .then(function(r){if(!r.ok)return r.text().then(function(x){throw new Error(r.status+" "+x)});return r.json()})
+   .then(renderReports)
+   .catch(function(e){body.innerHTML='<div class="repmsg">โหลดไม่สำเร็จ<br>'+esc(String(e.message||e))+'</div>'});
+}
+function renderReports(rows){
+  lastRows=rows;
+  var ok=rows.filter(function(o){return o.status!=="void"});
+  var voided=rows.filter(function(o){return o.status==="void"});
+  var rev=0,cash=0,pp=0,cost=0,disc=0,items={},byStaff={},hours={};
+  ok.forEach(function(o){
+    var tt=Number(o.total)||0;rev+=tt;cost+=Number(o.cost)||0;disc+=Number(o.discount)||0;
+    if(o.payment_method==="cash")cash+=tt;else pp+=tt;
+    var st=o.staff||"-";byStaff[st]=(byStaff[st]||0)+tt;
+    var hh=new Date(o.created_at).getHours();hours[hh]=(hours[hh]||0)+tt;
+    (o.items||[]).forEach(function(it){var k=it.name;if(!items[k])items[k]={q:0,a:0};items[k].q+=it.qty;items[k].a+=it.price*it.qty});
+  });
+  var profit=rev-cost;
+  var margin=rev>0?Math.round(profit/rev*100):0;
+  var top=Object.keys(items).map(function(k){return {name:k,q:items[k].q,a:items[k].a}}).sort(function(a,b){return b.q-a.q}).slice(0,12);
+  var h='<div class="stats">'+
+    '<div class="stat"><div class="k">ยอดขาย</div><div class="v">'+baht(rev)+'</div><div class="s">'+ok.length+' บิล</div></div>'+
+    '<div class="stat good"><div class="k">กำไรขั้นต้น</div><div class="v">'+baht(profit)+'</div><div class="s">margin '+margin+'% · ต้นทุน '+baht(cost)+'</div></div>'+
+    '<div class="stat"><div class="k">เงินสด</div><div class="v">'+baht(cash)+'</div></div>'+
+    '<div class="stat"><div class="k">พร้อมเพย์</div><div class="v">'+baht(pp)+'</div></div></div>';
+  /* hourly chart */
+  var hmax=0;for(var k2 in hours){if(hours[k2]>hmax)hmax=hours[k2]}
+  var bars="";for(var hh=6;hh<=21;hh++){var v=hours[hh]||0;var pct=hmax?Math.round(v/hmax*100):0;
+    bars+='<div class="bar"><div class="val">'+(v?Math.round(v):"")+'</div><div class="b'+(v?"":" zero")+'" style="height:'+(v?Math.max(pct,3):2)+'%"></div><div class="h">'+hh+'</div></div>'}
+  h+='<div class="card"><h3>ยอดขายรายชั่วโมง</h3><div class="chart">'+bars+'</div></div>';
+  /* staff */
+  var stKeys=Object.keys(byStaff);
+  if(stKeys.length){h+='<div class="card"><h3>ยอดขายตามพนักงาน</h3>'+stKeys.sort(function(a,b){return byStaff[b]-byStaff[a]}).map(function(s){
+    return '<div class="trow"><span>'+esc(s)+'</span><span>'+baht(byStaff[s])+'</span></div>'}).join("")+'</div>'}
+  /* top items */
+  h+='<div class="card"><h3>สินค้าขายดี</h3>'+(top.length?top.map(function(t){
+    return '<div class="trow"><span>'+esc(t.name)+'</span><span class="q">'+t.q+' '+L().qty+'</span><span>'+baht(t.a)+'</span></div>'}).join(""):'<div class="repmsg">ยังไม่มีข้อมูล</div>')+'</div>';
+  /* audit-ish */
+  h+='<div class="card"><h3>ตรวจสอบ <span class="pill warn">ยกเลิก '+voided.length+' บิล · ส่วนลดรวม '+baht(disc)+'</span></h3>'+
+    (voided.length?voided.map(function(o){return '<div class="trow"><span>'+new Date(o.created_at).toLocaleString("th-TH")+' · '+esc(o.staff||"-")+'</span><span>'+baht(o.total)+'</span></div>'}).join(""):'<div style="color:var(--muted);font-weight:600;font-size:14px">ไม่มีบิลที่ถูกยกเลิกในช่วงนี้</div>')+'</div>';
+  /* bills */
+  h+='<div class="card"><h3>บิลล่าสุด</h3>'+(rows.length?rows.slice(0,60).map(function(o){
+    var vd=o.status==="void";
+    var tm=new Date(o.created_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+    var names=(o.items||[]).map(function(i){return i.name+(i.qty>1?("×"+i.qty):"")}).join(", ");
+    var pill=vd?'<span class="pill void">ยกเลิก</span>':(o.payment_method==="cash"?'<span class="pill cash">เงินสด</span>':'<span class="pill pp">พร้อมเพย์</span>');
+    return '<div class="brow'+(vd?" voided":"")+'"><span class="tm">'+tm+'</span><span class="it">'+esc(names)+' '+pill+' <span class="by">'+esc(o.staff||"-")+'</span></span><span class="am">'+baht(o.total)+'</span>'+(vd?'':'<button class="vbtn" data-void="'+o.id+'">ยกเลิก</button>')+'</div>';
+  }).join(""):'<div class="repmsg">ยังไม่มีข้อมูล</div>')+'</div>';
+  $("#repBody").innerHTML=h;
+}
+function voidOrder(id){
+  askDlg("ยกเลิกบิล","ระบุเหตุผล (บันทึกไว้ตรวจสอบ)",{input:true,placeholder:"เช่น ลูกค้าเปลี่ยนใจ / กดผิด",yes:"ยกเลิกบิล"},function(reason){
+    if(!reason){toast("ต้องระบุเหตุผล","err");return}
+    apiReq(apiBase()+"/rest/v1/orders?id=eq."+encodeURIComponent(id),{method:"PATCH",
+      headers:apiHeaders({"Prefer":"return=minimal"}),
+      body:JSON.stringify({status:"void",void_reason:reason,void_by:ME?ME.name:"-"})})
+     .then(function(r){if(r.ok){logAct("void","บิล "+id+" — "+reason);toast("ยกเลิกบิลแล้ว","ok");loadReports()}
+       else{toast("ยกเลิกไม่สำเร็จ ("+r.status+")","err")}})
+     .catch(function(){toast("ยกเลิกไม่สำเร็จ — ไม่มีเน็ต","err")});
+  });
+}
+function exportCSV(){
+  if(!lastRows.length){toast("ไม่มีข้อมูลให้ส่งออก","err");return}
+  var rows=[["วันเวลา","พนักงาน","รายการ","ยอด","ต้นทุน","ช่องทาง","สถานะ","เหตุผลยกเลิก"]];
+  lastRows.forEach(function(o){rows.push([new Date(o.created_at).toLocaleString("th-TH"),o.staff||"-",
+    (o.items||[]).map(function(i){return i.name+"x"+i.qty}).join(" / "),o.total,o.cost||0,
+    o.payment_method==="cash"?"เงินสด":"พร้อมเพย์",o.status==="void"?"ยกเลิก":"ปกติ",o.void_reason||""])});
+  var csv="\uFEFF"+rows.map(function(r){return r.map(function(c){return '"'+csvSafe(c).replace(/"/g,'""')+'"'}).join(",")}).join("\n");
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="banfa_"+($("#repFrom").value||todayStr())+"_"+($("#repTo").value||todayStr())+".csv";a.click();
+  toast("ส่งออก CSV แล้ว","ok");
+}
+
+/* ---------- menu admin ---------- */
+function catSelect(sel){return '<select class="mc" data-f="cat">'+CATS.map(function(c){return '<option value="'+c.id+'"'+(c.id===sel?" selected":"")+'>'+c.th+'</option>'}).join("")+'</select>'}
+function renderMenuAdmin(){
+  var h='<div class="card"><h3>เมนู &amp; ราคา <span style="font-weight:600;color:var(--muted);font-size:13px">'+P.length+' รายการ</span><button class="btn primary sm" id="menuSave">บันทึก</button></h3>';
+  CATS.forEach(function(c){var items=P.filter(function(p){return p.cat===c.id});if(!items.length)return;
+    h+='<div class="lbl">'+c.th+'</div>';
+    items.forEach(function(p){var i=P.indexOf(p);var cost=menuCost(p.id);var pf=p.price-cost;
+      h+='<div class="mrow" data-i="'+i+'">'+
+        '<input class="mn" type="text" data-f="name" value="'+esc(p.name)+'">'+
+        '<input class="mp" type="number" data-f="price" value="'+p.price+'">'+catSelect(p.cat)+
+        '<span class="info">ทุน '+baht(cost)+' · กำไร <b'+(pf<0?' class="neg"':'')+'>'+baht(pf)+'</b></span>'+
+        '<div class="sw '+(p.active!==false?"on":"")+'" data-f="active" title="พร้อมขาย"></div>'+
+        '<button class="x" data-del="'+i+'">×</button></div>';
+    });
+  });
+  h+='<div class="addbar"><input class="an" id="newName" type="text" placeholder="ชื่อเมนูใหม่">'+
+    '<input id="newPrice" type="number" placeholder="ราคา" style="width:90px">'+
+    '<select id="newCat">'+CATS.map(function(c){return '<option value="'+c.id+'">'+c.th+'</option>'}).join("")+'</select>'+
+    '<button class="btn dark" id="menuAdd">+ เพิ่มเมนู</button></div></div>';
+  $("#paneMenu").innerHTML=h;
+}
+function collectMenuRows(){
+  var rows=document.querySelectorAll("#paneMenu .mrow");
+  for(var k=0;k<rows.length;k++){var i=parseInt(rows[k].getAttribute("data-i"),10);var p=P[i];if(!p)continue;
+    p.name=rows[k].querySelector('[data-f="name"]').value.trim()||p.name;
+    p.price=parseFloat(rows[k].querySelector('[data-f="price"]').value)||0;
+    p.cat=rows[k].querySelector('[data-f="cat"]').value;
+    p.active=rows[k].querySelector('[data-f="active"]').className.indexOf("on")>=0;}
+}
+
+/* ---------- recipe admin ---------- */
+function ingSelect(sel){return '<select data-f="ring"><option value="">— เลือกวัตถุดิบ —</option>'+ING.map(function(i){return '<option value="'+i.id+'"'+(i.id===sel?" selected":"")+'>'+esc(i.name)+' ('+i.unit+')</option>'}).join("")+'</select>'}
+var recFilter="";
+function renderRecipeAdmin(){
+  var h='<div class="card"><h3>สูตร &amp; ต้นทุนต่อเมนู<button class="btn primary sm" id="recSave">บันทึก</button></h3>'+
+    '<div class="addbar"><input class="an" id="recSearch" type="text" placeholder="ค้นหาเมนู…" value="'+esc(recFilter)+'"></div>'+
+    '<div class="lbl">ใส่วัตถุดิบที่ใช้ต่อ 1 แก้ว → ระบบจะตัดสต็อกอัตโนมัติและคำนวณต้นทุน/กำไรให้</div>';
+  var list=P.filter(function(p){return !recFilter||p.name.toLowerCase().indexOf(recFilter.toLowerCase())>=0});
+  if(!list.length)h+='<div class="repmsg">ไม่พบเมนู</div>';
+  list.slice(0,40).forEach(function(p){
+    var r=recipeOf(p.id);var cost=menuCost(p.id);var pf=p.price-cost;
+    h+='<div class="rec-item" data-m="'+p.id+'"><div class="rh"><b>'+esc(p.name)+'</b>'+
+      '<span class="info">ราคา '+baht(p.price)+' · ทุน '+baht(cost)+' · กำไร <b'+(pf<0?' class="neg"':'')+'>'+baht(pf)+'</b>'+(p.price>0?(' ('+Math.round(pf/p.price*100)+'%)'):'')+'</span>'+
+      '<button class="btn ghost sm" data-radd="'+p.id+'">+ วัตถุดิบ</button></div>';
+    if(!r.length)h+='<div style="color:var(--faint);font-size:13px;font-weight:600">ยังไม่มีสูตร</div>';
+    r.forEach(function(x,xi){var ig=findI(x.ing);
+      h+='<div class="mrow" data-m="'+p.id+'" data-x="'+xi+'">'+ingSelect(x.ing)+
+        '<input class="mu" type="number" step="0.01" data-f="rqty" value="'+x.qty+'">'+
+        '<span class="info">'+(ig?ig.unit+' · '+baht((ig.cost||0)*x.qty):'')+'</span>'+
+        '<button class="x" data-rdel="'+p.id+'_'+xi+'">×</button></div>';
+    });
+    h+='</div>';
+  });
+  if(list.length>40)h+='<div class="repmsg">แสดง 40 รายการแรก — ใช้ช่องค้นหาเพื่อหาเมนูอื่น</div>';
+  h+='</div>';
+  $("#paneRecipe").innerHTML=h;
+  var s=$("#recSearch");if(s){s.addEventListener("input",function(e){collectRecRows();recFilter=e.target.value;renderRecipeAdmin();var s2=$("#recSearch");s2.focus();s2.setSelectionRange(s2.value.length,s2.value.length)})}
+}
+function collectRecRows(){
+  var rows=document.querySelectorAll("#paneRecipe .mrow[data-m]");
+  for(var k=0;k<rows.length;k++){
+    var mid=rows[k].getAttribute("data-m"),xi=parseInt(rows[k].getAttribute("data-x"),10);
+    var arr=REC[String(mid)];if(!arr||!arr[xi])continue;
+    arr[xi].ing=rows[k].querySelector('[data-f="ring"]').value;
+    arr[xi].qty=parseFloat(rows[k].querySelector('[data-f="rqty"]').value)||0;}
+}
+
+/* ---------- ingredients admin ---------- */
+/* ---------- options admin ---------- */
+function optIngSelect(sel){return '<select data-f="oing"><option value="">— ไม่ตัดสต็อก —</option>'+ING.map(function(i){return '<option value="'+i.id+'"'+(i.id===sel?" selected":"")+'>'+esc(i.name)+'</option>'}).join("")+'</select>'}
+function renderOptAdmin(){
+  var h='<div class="card"><h3>กลุ่มตัวเลือก<button class="btn primary sm" id="optSave">บันทึก</button></h3>';
+  OPTG.forEach(function(g,gi){
+    h+='<div class="opt-g" data-g="'+gi+'"><div class="gh"><input data-f="gname" type="text" value="'+esc(g.name)+'">'+
+      '<select data-f="gtype"><option value="single"'+(g.type==="single"?" selected":"")+'>เลือก 1</option><option value="multi"'+(g.type==="multi"?" selected":"")+'>เลือกหลายอย่าง</option></select>'+
+      '<select data-f="greq"><option value="1"'+(g.required?" selected":"")+'>ต้องเลือก</option><option value="0"'+(!g.required?" selected":"")+'>ไม่บังคับ</option></select>'+
+      '<button class="x" data-gdel="'+gi+'">×</button></div>';
+    h+='<div class="lbl">ใช้กับหมวด</div><div class="chips">'+CATS.map(function(c){return '<button class="chip '+(g.cats.indexOf(c.id)>=0?"on":"")+'" data-gc="'+gi+'" data-c="'+c.id+'">'+c.th+'</button>'}).join("")+'</div>';
+    h+='<div class="lbl">ตัวเลือก — ชื่อ / บวกเงิน / ตัดวัตถุดิบ / จำนวน</div>';
+    g.options.forEach(function(o,oi){
+      h+='<div class="mrow" data-g="'+gi+'" data-o="'+oi+'"><input class="mn" type="text" data-f="oname" value="'+esc(o.name)+'">'+
+        '<input class="mp" type="number" data-f="oprice" value="'+o.price+'">'+optIngSelect(o.ing||"")+
+        '<input class="mu" type="number" step="0.01" data-f="oiqty" value="'+(o.iqty||0)+'">'+
+        '<button class="x" data-odel="'+gi+'_'+oi+'">×</button></div>'});
+    h+='<button class="btn ghost sm" data-oadd="'+gi+'" style="margin-top:8px">+ ตัวเลือก</button></div>';
+  });
+  h+='<button class="btn dark" id="groupAdd">+ เพิ่มกลุ่มตัวเลือก</button></div>';
+  $("#paneOptions").innerHTML=h;
+}
+function collectOptRows(){
+  var groups=document.querySelectorAll("#paneOptions .opt-g");
+  for(var k=0;k<groups.length;k++){var gi=parseInt(groups[k].getAttribute("data-g"),10);var g=OPTG[gi];if(!g)continue;
+    g.name=groups[k].querySelector('[data-f="gname"]').value.trim()||g.name;
+    g.type=groups[k].querySelector('[data-f="gtype"]').value;
+    g.required=groups[k].querySelector('[data-f="greq"]').value==="1";
+    var orows=groups[k].querySelectorAll(".mrow");
+    for(var m2=0;m2<orows.length;m2++){var oi=parseInt(orows[m2].getAttribute("data-o"),10);if(!g.options[oi])continue;
+      g.options[oi].name=orows[m2].querySelector('[data-f="oname"]').value.trim()||g.options[oi].name;
+      g.options[oi].price=parseFloat(orows[m2].querySelector('[data-f="oprice"]').value)||0;
+      g.options[oi].ing=orows[m2].querySelector('[data-f="oing"]').value;
+      g.options[oi].iqty=parseFloat(orows[m2].querySelector('[data-f="oiqty"]').value)||0;}
+  }
+}
+
+/* ---------- staff admin ---------- */
+function renderStaffAdmin(){
+  var h='<div class="card"><h3>พนักงาน &amp; สิทธิ์<button class="btn primary sm" id="staffSave">บันทึก</button></h3>'+
+    '<div class="lbl">แต่ละคนมี PIN ของตัวเอง — ระบบบันทึกว่าใครขาย ใครยกเลิกบิล</div>';
+  if(!STAFF.length)h+='<div class="repmsg">ยังไม่มีพนักงาน — ตอนนี้เข้าด้วย PIN สำรอง '+CONFIG.FALLBACK_ADMIN_PIN+'<br>เพิ่มคนแรกแล้ว PIN สำรองจะใช้ไม่ได้อีก</div>';
+  STAFF.forEach(function(s,i){
+    h+='<div class="mrow" data-i="'+i+'"><input class="mn" type="text" data-f="sname" value="'+esc(s.name)+'">'+
+      '<input class="mp" type="text" inputmode="numeric" data-f="spin" value="'+esc(s.pin)+'" placeholder="PIN">'+
+      '<select data-f="srole"><option value="cashier"'+(s.role==="cashier"?" selected":"")+'>พนักงาน</option><option value="admin"'+(s.role==="admin"?" selected":"")+'>แอดมิน</option></select>'+
+      '<div class="sw '+(s.active!==false?"on":"")+'" data-f="sactive" title="ใช้งาน"></div>'+
+      '<button class="x" data-sdel="'+i+'">×</button></div>';
+  });
+  h+='<div class="addbar"><input class="an" id="stName" type="text" placeholder="ชื่อพนักงาน">'+
+    '<input id="stPin" type="text" inputmode="numeric" placeholder="PIN (4-6 หลัก)" style="width:150px">'+
+    '<select id="stRole"><option value="cashier">พนักงาน</option><option value="admin">แอดมิน</option></select>'+
+    '<button class="btn dark" id="staffAdd">+ เพิ่มพนักงาน</button></div></div>';
+  $("#paneStaff").innerHTML=h;
+}
+function collectStaffRows(){
+  var rows=document.querySelectorAll("#paneStaff .mrow");
+  for(var k=0;k<rows.length;k++){var i=parseInt(rows[k].getAttribute("data-i"),10);var s=STAFF[i];if(!s)continue;
+    s.name=rows[k].querySelector('[data-f="sname"]').value.trim()||s.name;
+    s.pin=rows[k].querySelector('[data-f="spin"]').value.replace(/[^0-9]/g,"")||s.pin;
+    s.role=rows[k].querySelector('[data-f="srole"]').value;
+    s.active=rows[k].querySelector('[data-f="sactive"]').className.indexOf("on")>=0;}
+}
+
+/* ---------- audit admin ---------- */
+function renderAuditAdmin(){
+  var h='<div class="card"><h3>ประวัติการแก้ไข<button class="btn ghost sm" id="auditRefresh">รีเฟรช</button></h3>'+
+    '<div class="lbl">บันทึกทุกการเข้าระบบ แก้เมนู/ราคา ยกเลิกบิล ส่วนลด และปรับสต็อก</div><div id="auditList">กำลังโหลด…</div></div>';
+  $("#paneAudit").innerHTML=h;
+  var local=lsGet("audit_local")||[];
+  function paint(rows){
+    $("#auditList").innerHTML=rows.length?rows.slice(0,120).map(function(e){
+      return '<div class="brow"><span class="tm">'+new Date(e.created_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+'</span>'+
+        '<span class="it"><b>'+esc(e.actor||"-")+'</b> · '+esc(e.action)+' <span class="by">'+esc(e.detail||"")+'</span></span>'+
+        '<span class="by">'+new Date(e.created_at).toLocaleDateString("th-TH",{day:"numeric",month:"short"})+'</span></div>'}).join(""):'<div class="repmsg">ยังไม่มีประวัติ</div>';
+  }
+  paint(local);
+  if(cfgOk()){apiReq(apiBase()+"/rest/v1/audit_log?select=*&order=created_at.desc&limit=200",{headers:apiHeaders()})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(rows){if(rows.length)paint(rows)}).catch(function(){})}
+}
+
+/* ---------- settings admin ---------- */
+function renderSettingsAdmin(){
+  var onl=(navigator.onLine!==false);
+  var h='<div class="card"><h3>ตั้งค่าร้าน<button class="btn primary sm" id="setSave">บันทึก</button></h3>'+
+    '<div class="lbl">เบอร์พร้อมเพย์ / เลขบัตรประชาชน (ใช้สร้าง QR รับเงิน)</div>'+
+    '<div class="mrow"><input class="mn" id="setPP" type="text" inputmode="numeric" placeholder="เช่น 0812345678" value="'+esc(SETTINGS.pp||"")+'"></div></div>';
+  h+='<div class="card"><h3>สถานะการซิงค์</h3>'+
+    '<div class="trow"><span>โหมดการทำงาน</span><span class="pill pp">ออนไลน์เต็มรูปแบบ</span></div>'+
+    '<div class="trow"><span>สถานะเน็ต</span><span>'+(onl?'<span class="pill ok">ออนไลน์</span>':'<span class="pill void">ออฟไลน์ — ขายไม่ได้</span>')+'</span></div>'+
+    '<div class="trow"><span>Supabase Auth</span><span>'+(AUTH_TOKEN?'<span class="pill pp">เปิดใช้งาน</span>':'<span class="pill warn">ยังไม่เปิด (ใช้ anon key)</span>')+'</span></div>'+
+    '<div class="addbar"><button class="btn ghost" id="pullCloud">ดึงข้อมูลล่าสุดจาก cloud</button></div></div>';
+  h+='<div class="card"><h3>ข้อมูลสำรอง</h3><div class="lbl">ดาวน์โหลดเมนู/สูตร/วัตถุดิบ/พนักงาน เก็บไว้กันหาย</div>'+
+    '<div class="addbar"><button class="btn ghost" id="backupBtn">ดาวน์โหลดไฟล์สำรอง</button></div></div>';
+  $("#paneSettings").innerHTML=h;
+}
+function backupAll(){
+  var data={menu:P,optgroups:OPTG,ingredients:ING,recipes:REC,staff:STAFF,settings:SETTINGS,at:new Date().toISOString()};
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download="banfa_backup_"+todayStr()+".json";a.click();toast("ดาวน์โหลดไฟล์สำรองแล้ว","ok");
+}
+
+/* ---------- events: sell ---------- */
+$("#cats").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-cat]"):null;if(b){activeCat=b.getAttribute("data-cat");renderCats();renderGrid();$("#gridWrap").scrollTop=0}});
+$("#gridWrap").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-add]"):null;if(b)addToCart(parseInt(b.getAttribute("data-add"),10))});
+var searchT=null;
+$("#search").addEventListener("input",function(e){var v=e.target.value;
+  if(searchT)clearTimeout(searchT);
+  searchT=setTimeout(function(){query=v;renderGrid()},200)});
+$("#orderList").addEventListener("click",function(e){var i=e.target.closest?e.target.closest("[data-inc]"):null,d=e.target.closest?e.target.closest("[data-dec]"):null;if(i)chg(i.getAttribute("data-inc"),1);if(d)chg(d.getAttribute("data-dec"),-1)});
+$("#clearBtn").addEventListener("click",function(){askDlg("ล้างออเดอร์","ลบทุกรายการในตะกร้า?",{yes:"ล้าง"},function(){cart=[];renderOrder();toast("ล้างออเดอร์แล้ว")})});
+$("#chargeBtn").addEventListener("click",openPay);
+$("#moView").addEventListener("click",openPay);
+$("#optClose").addEventListener("click",closeOptions);
+$("#optScrim").addEventListener("click",closeOptions);
+$("#optBody").addEventListener("click",function(e){var b=e.target.closest?e.target.closest(".oopt"):null;if(b)optPick(b.getAttribute("data-g"),parseInt(b.getAttribute("data-o"),10))});
+$("#optAdd").addEventListener("click",confirmOptions);
+$("#sheetClose").addEventListener("click",closePay);
+$("#scrim").addEventListener("click",closePay);
+document.querySelector(".seg").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-pm]"):null;if(b){payMethod=b.getAttribute("data-pm");var s=document.querySelectorAll(".seg button");for(var i=0;i<s.length;i++)s[i].className=(s[i]===b?"on":"");setPane();syncPay()}});
+document.querySelector(".disc-row .u").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-du]"):null;if(b){discUnit=b.getAttribute("data-du");var s=document.querySelectorAll(".disc-row .u button");for(var i=0;i<s.length;i++)s[i].className=(s[i]===b?"on":"");syncPay()}});
+$("#discInput").addEventListener("input",syncPay);
+$("#tender").addEventListener("input",updateChange);
+$("#quick").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-q]"):null;if(b){$("#tender").value=b.getAttribute("data-q");updateChange()}});
+$("#confirmBtn").addEventListener("click",confirmPay);
+$("#newOrder").addEventListener("click",newOrder);
+
+/* ---------- events: nav ---------- */
+document.querySelector(".topnav").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-view]"):null;
+  if(b){showView(b.getAttribute("data-view"));return}
+  if(e.target.closest&&e.target.closest("#navAdmin"))openAdmin();
+});
+function openAdmin(){
+  if(!ME||ME.role!=="admin"){toast("ต้องเป็นแอดมินเท่านั้น","err");return}
+  if(cart.length){
+    askDlg("ยังมีของในตะกร้า","ออกไปหน้าหลังบ้านตอนนี้ ออเดอร์ที่ค้างจะหาย",{yes:"ไปหลังบ้าน",safe:true},function(){go_admin()});
+    return}
+  go_admin();
+}
+function go_admin(){logAct("open_backoffice","เปิดหน้าหลังบ้านจากเครื่องขาย");window.location.href=CONFIG.ADMIN_URL||"/admin.html"}
+document.querySelector(".subnav").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-tab]"):null;if(b)showAdminTab(b.getAttribute("data-tab"))});
+
+/* ---------- events: reports ---------- */
+$("#repRefresh").addEventListener("click",loadReports);
+$("#repFrom").addEventListener("change",loadReports);
+$("#repTo").addEventListener("change",loadReports);
+$("#repCsv").addEventListener("click",exportCSV);
+$("#repSync").addEventListener("click",function(){loadReports();toast("โหลดใหม่แล้ว")});
+$("#quickDays").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-d]"):null;if(b){
+  var btns=$("#quickDays").querySelectorAll("button");for(var i=0;i<btns.length;i++)btns[i].className=(btns[i]===b?"on":"");
+  setRange(parseInt(b.getAttribute("data-d"),10));loadReports()}});
+$("#repBody").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-void]"):null;if(b)voidOrder(b.getAttribute("data-void"))});
+
+/* ---------- events: menu admin ---------- */
+$("#paneMenu").addEventListener("click",function(e){var t=e.target;
+  if(t.getAttribute&&t.getAttribute("data-f")==="active"&&t.className.indexOf("sw")>=0){t.className="sw"+(t.className.indexOf("on")>=0?"":" on");return}
+  var del=t.closest?t.closest("[data-del]"):null;
+  if(del){var di=parseInt(del.getAttribute("data-del"),10);var nm=P[di]?P[di].name:"";
+    askDlg("ลบเมนู","ลบ \""+nm+"\" ออกถาวร?",{yes:"ลบ"},function(){collectMenuRows();P.splice(di,1);saveCfg("menu");logAct("menu_delete",nm);renderMenuAdmin();renderGrid();toast("ลบแล้ว","ok")});return}
+  if(t.id==="menuSave"){collectMenuRows();saveCfg("menu");logAct("menu_edit","แก้เมนู/ราคา");renderMenuAdmin();renderGrid();toast("บันทึกแล้ว","ok");return}
+  if(t.id==="menuAdd"){collectMenuRows();var nm2=$("#newName").value.trim();if(!nm2){toast("ใส่ชื่อเมนูก่อน","err");return}
+    P.push({id:nextMenuId(),name:nm2,price:parseFloat($("#newPrice").value)||0,cat:$("#newCat").value,active:true,track:false,stock:0});
+    saveCfg("menu");logAct("menu_add",nm2);renderMenuAdmin();renderGrid();toast("เพิ่ม "+nm2+" แล้ว","ok");return}
+});
+
+/* ---------- events: recipe admin ---------- */
+$("#paneRecipe").addEventListener("click",function(e){var t=e.target;
+  var add=t.getAttribute?t.getAttribute("data-radd"):null;
+  if(add!==null&&add!==undefined){collectRecRows();var k=String(add);if(!REC[k])REC[k]=[];REC[k].push({ing:"",qty:0});renderRecipeAdmin();return}
+  var del=t.closest?t.closest("[data-rdel]"):null;
+  if(del){collectRecRows();var pr=del.getAttribute("data-rdel").split("_");REC[pr[0]].splice(parseInt(pr[1],10),1);renderRecipeAdmin();return}
+  if(t.id==="recSave"){collectRecRows();
+    for(var kk in REC){REC[kk]=REC[kk].filter(function(x){return x.ing&&x.qty>0})}
+    saveCfg("recipes");logAct("recipe_edit","แก้สูตร/ต้นทุน");renderRecipeAdmin();renderGrid();toast("บันทึกสูตรแล้ว","ok");return}
+});
+
+/* ---------- events: ingredients ---------- */
+$("#paneIng").addEventListener("click",function(e){var t=e.target;
+});
+
+/* ---------- events: options ---------- */
+$("#paneOptions").addEventListener("click",function(e){var t=e.target;
+  var gc=t.getAttribute?t.getAttribute("data-gc"):null;
+  if(gc!==null&&gc!==undefined&&t.className.indexOf("chip")>=0){collectOptRows();var gi=parseInt(gc,10);var cid=t.getAttribute("data-c");
+    var arr=OPTG[gi].cats;var ix=arr.indexOf(cid);if(ix>=0)arr.splice(ix,1);else arr.push(cid);renderOptAdmin();return}
+  var oadd=t.getAttribute?t.getAttribute("data-oadd"):null;
+  if(oadd!==null&&oadd!==undefined){collectOptRows();OPTG[parseInt(oadd,10)].options.push({name:"ตัวเลือกใหม่",price:0,ing:"",iqty:0});renderOptAdmin();return}
+  var odel=t.closest?t.closest("[data-odel]"):null;
+  if(odel){collectOptRows();var pr=odel.getAttribute("data-odel").split("_");OPTG[parseInt(pr[0],10)].options.splice(parseInt(pr[1],10),1);renderOptAdmin();return}
+  var gdel=t.closest?t.closest("[data-gdel]"):null;
+  if(gdel){var gj=parseInt(gdel.getAttribute("data-gdel"),10);var gn=OPTG[gj]?OPTG[gj].name:"";
+    askDlg("ลบกลุ่มตัวเลือก","ลบ \""+gn+"\"?",{yes:"ลบ"},function(){collectOptRows();OPTG.splice(gj,1);saveCfg("optgroups");logAct("option_delete",gn);renderOptAdmin();toast("ลบแล้ว","ok")});return}
+  if(t.id==="groupAdd"){collectOptRows();OPTG.push({id:"g_"+Date.now(),name:"กลุ่มใหม่",type:"single",required:false,cats:[],options:[{name:"ตัวเลือก",price:0,ing:"",iqty:0}]});renderOptAdmin();return}
+  if(t.id==="optSave"){collectOptRows();saveCfg("optgroups");logAct("option_edit","แก้กลุ่มตัวเลือก");renderOptAdmin();toast("บันทึกแล้ว","ok");return}
+});
+
+/* ---------- events: staff ---------- */
+$("#paneStaff").addEventListener("click",function(e){var t=e.target;
+  if(t.getAttribute&&t.getAttribute("data-f")==="sactive"&&t.className.indexOf("sw")>=0){t.className="sw"+(t.className.indexOf("on")>=0?"":" on");return}
+  var del=t.closest?t.closest("[data-sdel]"):null;
+  if(del){var si=parseInt(del.getAttribute("data-sdel"),10);var nm=STAFF[si]?STAFF[si].name:"";
+    askDlg("ลบพนักงาน","ลบ \""+nm+"\" ออกจากระบบ?",{yes:"ลบ"},function(){collectStaffRows();STAFF.splice(si,1);saveCfg("staff");logAct("staff_delete",nm);renderStaffAdmin();toast("ลบแล้ว","ok")});return}
+  if(t.id==="staffSave"){collectStaffRows();
+    var pins={},dup="";STAFF.forEach(function(s){if(pins[s.pin])dup=s.pin;pins[s.pin]=1});
+    if(dup){toast("PIN ซ้ำกัน: "+dup,"err");return}
+    if(!STAFF.some(function(s){return s.role==="admin"&&s.active!==false})){toast("ต้องมีแอดมินอย่างน้อย 1 คน","err");return}
+    saveCfg("staff");logAct("staff_edit","แก้ข้อมูลพนักงาน");renderStaffAdmin();toast("บันทึกแล้ว","ok");return}
+  if(t.id==="staffAdd"){collectStaffRows();
+    var n=$("#stName").value.trim();var p=$("#stPin").value.replace(/[^0-9]/g,"");
+    if(!n||p.length<4){toast("ใส่ชื่อ และ PIN 4 หลักขึ้นไป","err");return}
+    if(STAFF.some(function(s){return String(s.pin)===p})){toast("PIN นี้ถูกใช้แล้ว","err");return}
+    STAFF.push({id:"s_"+Date.now(),name:n,pin:p,role:$("#stRole").value,active:true});
+    saveCfg("staff");logAct("staff_add",n);renderStaffAdmin();toast("เพิ่ม "+n+" แล้ว","ok");return}
+});
+$("#paneAudit").addEventListener("click",function(e){if(e.target.id==="auditRefresh")renderAuditAdmin()});
+
+/* ---------- events: settings ---------- */
+$("#paneSettings").addEventListener("click",function(e){var t=e.target;
+  if(t.id==="setSave"){SETTINGS.pp=($("#setPP").value||"").replace(/[^0-9]/g,"");saveCfg("settings");logAct("settings","แก้ตั้งค่าร้าน");renderSettingsAdmin();toast("บันทึกแล้ว","ok");return}
+  if(t.id==="pullCloud"){loadConfigCloud(function(ok){renderSettingsAdmin();toast(ok?"ดึงข้อมูลล่าสุดแล้ว":"ดึงข้อมูลไม่สำเร็จ",ok?"ok":"err")});return}
+  if(t.id==="backupBtn"){backupAll();return}
+});
+
+/* ---------- events: dialog / login ---------- */
+$("#dlgNo").addEventListener("click",closeDlg);
+$("#dlgYes").addEventListener("click",function(){var cb=dlgCb;var val=$("#dlgInput").style.display==="none"?true:$("#dlgInput").value.trim();closeDlg();if(cb)cb(val)});
+$("#dlg").addEventListener("click",function(e){if(e.target===$("#dlg"))closeDlg()});
+$("#dlgInput").addEventListener("keydown",function(e){if(e.key==="Enter")$("#dlgYes").click()});
+$("#syncChip").addEventListener("click",function(){if(pendingList().length)openPending()});
+$("#pdClose").addEventListener("click",function(){$("#pending").className="sv"});
+$("#pdSend").addEventListener("click",resendPending);
+$("#pdCsv").addEventListener("click",exportPending);
+$("#pdClear").addEventListener("click",function(){
+  var n=pendingList().length;
+  askDlg("ล้างรายการบิลค้าง","ลบ "+n+" บิลออกจากรายการนี้ถาวร\nทำเมื่อจดใส่สมุดเรียบร้อยแล้วเท่านั้น",{yes:"ล้างทิ้ง"},function(){
+    lsSet("failed_sales",[]);updateSyncUI();renderPending();
+    logAct("clear_failed_sales","ล้างบิลค้าง "+n+" บิล");toast("ล้างแล้ว","ok");
+  });
+});
+$("#cashBtn").addEventListener("click",openCashMove);
+$("#cmCancel").addEventListener("click",function(){$("#cashMove").className="sv"});
+$("#cmSave").addEventListener("click",saveCashMove);
+$("#cmChips").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-cmr]"):null;if(!b)return;
+  var kids=$("#cmChips").children;
+  for(var i=0;i<kids.length;i++)kids[i].className="chip";
+  b.className="chip on";
+  var v=b.getAttribute("data-cmr");
+  if(v==="__other__"){
+    $("#cmReason").style.display="";$("#cmReason").value="";$("#cmReason").focus();
+  }else{
+    $("#cmReason").style.display="none";$("#cmReason").value=v;
+  }
+});
+$("#shiftBtn").addEventListener("click",function(){
+  if(SHIFT){closeShiftScreen();return}
+  toast("กำลังตรวจสอบกะ…");
+  syncShiftFromServer(function(){
+    if(SHIFT){updateShiftUI();toast("มีกะเปิดอยู่แล้ว (เปิดโดย "+SHIFT.staff+")","ok")}
+    else openShiftScreen();
+  });
+});
+$("#osQuick").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-c]"):null;if(b)$("#osCash").value=b.getAttribute("data-c")});
+$("#osStart").addEventListener("click",startShift);
+$("#csCounted").addEventListener("input",updateDiff);
+$("#csCancel").addEventListener("click",function(){$("#closeShift").className="sv"});
+$("#csConfirm").addEventListener("click",confirmCloseShift);
+$("#csqChips").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-csqr]"):null;if(!b)return;
+  var kids=$("#csqChips").children;
+  for(var i=0;i<kids.length;i++)kids[i].className="chip";
+  b.className="chip on";
+  var v=b.getAttribute("data-csqr");
+  if(v==="__other__"){
+    $("#csqReason").style.display="";$("#csqReason").value="";$("#csqReason").focus();
+  }else{
+    $("#csqReason").style.display="none";$("#csqReason").value=v;
+  }
+});
+$("#csqSave").addEventListener("click",saveQuickExpense);
+$("#keypad").addEventListener("click",function(e){var b=e.target.closest?e.target.closest("[data-k]"):null;if(b)keypad(b.getAttribute("data-k"))});
+$("#logoutBtn").addEventListener("click",function(){askDlg("ออกจากระบบ","ต้องใส่ PIN ใหม่เพื่อเข้าใช้งาน",{yes:"ออก",safe:true},logout)});
+document.addEventListener("keydown",function(e){if($("#login").className.indexOf("on")<0)return;
+  if(e.key>="0"&&e.key<="9")keypad(e.key);else if(e.key==="Enter")keypad("enter");else if(e.key==="Backspace")keypad("back")});
+
+window.addEventListener("online",function(){updateSyncUI();loadConfigCloud();toast("ออนไลน์แล้ว","ok")});
+window.addEventListener("offline",function(){updateSyncUI();toast("ออฟไลน์ — บิลจะบันทึกไม่ได้ ระวัง","err")});
+setInterval(updateSyncUI,15000);
+setInterval(function(){if(ME&&SHIFT)refreshShiftTotals()},120000);
+document.addEventListener("visibilitychange",function(){
+  if(!document.hidden&&ME)syncShiftFromServer();
+});
+
+/* ---------- init ---------- */
+AUTH_TOKEN=lsGet("auth_token")||null;
+AUTH_REFRESH=lsGet("auth_refresh")||null;
+loadShift();
+setRange(0);
+(function(){
+  var v=document.getElementById("verTag");if(v)v.textContent="POS v"+APP_VERSION;
+  var b=document.getElementById("brandVer");if(b)b.textContent="BANFA COFFEE · v"+APP_VERSION;
+  try{console.log("Banfa POS v"+APP_VERSION)}catch(e){}
+})();
+renderCats();renderGrid();renderOrder();
+var cached=lsGet("staff_cache");
+if(cached&&cached.id&&currentStaffId()===cached.id){ME=cached;$("#login").className="login";applyRole()}
+updateShiftUI();
+if(!ME){$("#login").className="login on";renderDots()}
+updateSyncUI();
+authSignIn(function(){
+  loadConfigCloud();
+  var nfp=pendingList().length;
+  if(nfp)setTimeout(function(){
+    askDlg("มีบิลค้าง "+nfp+" บิล","บิลเหล่านี้รับเงินแล้วแต่ยังไม่เข้าระบบ\nต้องการส่งซ้ำตอนนี้ไหม",
+      {yes:"เปิดดู",safe:true},function(){openPending()});
+  },900);
+  if(ME)syncShiftFromServer(function(){
+    if(!SHIFT)setTimeout(openShiftScreen,400);
+  });
+});
+</script>
+</body>
+</html>

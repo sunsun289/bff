@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="th" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1729">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>บ้านฟ้ากาแฟสด — รายรับ-รายจ่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="login on" id="login">
+  <div class="loginbox">
+    <div class="mark"></div>
+    <div class="lgname">บ้านฟ้ากาแฟสด</div>
+    <div class="lgsub">รายรับ-รายจ่าย — ใส่ PIN แอดมิน</div>
+    <div class="lgver" id="lgVer"></div>
+    <div class="dots" id="dots"></div>
+    <div class="lgerr" id="lgErr"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="c" class="alt">C</button><button data-k="0">0</button><button data-k="ok" class="go">✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="side-top">
+      <div class="mark"></div>
+      <div><b>บ้านฟ้ากาแฟสด</b><span>รายรับ-รายจ่าย</span></div>
+    </div>
+    <div class="who">
+      <span class="av" id="whoAv">?</span>
+      <div><div class="n" id="whoName">—</div><div class="r" id="whoRole"></div></div>
+      <button id="logout" title="ออกจากระบบ" aria-label="ออกจากระบบ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+
+    <div class="navsec">เมนู</div>
+    <nav id="nav">
+      <button data-p="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3zM13 21h8V11h-8zM13 7h8V3h-8zM3 21h8v-4H3z"/></svg>ภาพรวม</button>
+      <button data-p="txns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>รายการรับ-จ่าย</button>
+      <button data-p="recurring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>รายการประจำ</button>
+      <button data-p="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>รายงาน</button>
+    </nav>
+
+    <div class="navsec">คลังหลังร้าน</div>
+    <nav id="navWh">
+      <button data-p="whitems"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 8-9-5-9 5 9 5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg>คงเหลือ<span class="cnt" id="whLowCnt" hidden></span></button>
+      <button data-p="whmoves"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>รับเข้า/จ่ายออก</button>
+    </nav>
+
+    <button class="navgrp" data-g="gSettings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 11.5a3 3 0 1 0-1.5-5.6M18 20a5.5 5.5 0 0 0-2-4.2"/></svg>
+      ตั้งค่า<span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gSettings"><div class="cinner"><nav class="sub">
+      <button data-p="settings">รายรับ-รายจ่าย</button>
+      <button data-p="whsettings">คลังหลังร้าน</button>
+    </nav></div></div>
+
+    <div class="side-foot" id="foot">รายรับ-รายจ่าย</div>
+  </aside>
+
+  <main class="main">
+    <header class="bar">
+      <h1 id="title">ภาพรวม</h1>
+      <button class="chip-b" id="toAdmin" title="ไปหลังบ้าน POS">↩ หลังบ้าน POS</button>
+      <div id="range" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="chip-b" data-d="0">วันนี้</button>
+        <button class="chip-b" data-d="7">7 วัน</button>
+        <button class="chip-b on" data-d="30">30 วัน</button>
+        <button class="chip-b" data-d="90">90 วัน</button>
+        <div class="rangebox"><input type="date" id="from"><span>–</span><input type="date" id="to"></div>
+        <button class="go" id="apply">ตกลง</button>
+      </div>
+    </header>
+    <div class="scroll"><div class="wrap" id="page"></div></div>
+  </main>
+</div>
+
+<div class="dlg" id="dlg"><div class="dlgbox">
+  <b id="dlgTitle"></b><p id="dlgMsg"></p>
+  <input id="dlgInput" type="text" hidden>
+  <div class="dlgbtns"><button class="no" id="dlgNo">ยกเลิก</button><button class="yes" id="dlgYes">ยืนยัน</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script src="config-finance.js"></script>
+<script src="finance-core.js?v=2026.09.24-c"></script>
+<script src="finance-pages.js?v=2026.09.24-c"></script>
+<script src="finance-init.js?v=2026.09.24-c"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="th" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1729">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- กัน browser cache ตัว admin.html ทั้งไฟล์ค้าง (ไฟล์นี้ไม่มี ?v= เหมือน .js เพราะเป็นเอกสารหลัก ไม่ใช่ script)
+     ถ้าไม่มี 3 บรรทัดนี้ แก้ nav/markup แล้วโหลดไม่ขึ้นทั้งที่ .js อัปเดตแล้ว (เจอเมื่อ 21/9) -->
+<title>บ้านฟ้ากาแฟสด — หลังบ้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="login on" id="login">
+  <div class="loginbox">
+    <div class="mark"></div>
+    <div class="lgname">บ้านฟ้ากาแฟสด</div>
+    <div class="lgsub">หลังบ้าน — ใส่ PIN แอดมิน</div>
+    <div class="lgver" id="lgVer"></div>
+    <div class="dots" id="dots"></div>
+    <div class="lgerr" id="lgErr"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="c" class="alt">C</button><button data-k="0">0</button><button data-k="ok" class="go">✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="side-top">
+      <div class="mark"></div>
+      <div><b>บ้านฟ้ากาแฟสด</b><span>BACK OFFICE</span></div>
+    </div>
+    <div class="who">
+      <span class="av" id="whoAv">?</span>
+      <div><div class="n" id="whoName">—</div><div class="r" id="whoRole"></div></div>
+      <button id="logout" title="ออกจากระบบ" aria-label="ออกจากระบบ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+
+    <div class="navsec">รายงาน</div>
+    <nav>
+      <button data-p="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3zM13 21h8V11h-8zM13 7h8V3h-8zM3 21h8v-4H3z"/></svg>ภาพรวมร้านค้า</button>
+    </nav>
+
+    <button class="navgrp" data-g="gSales">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      ยอดขาย<span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gSales"><div class="cinner"><nav class="sub">
+      <button data-p="sales">รายงานการขาย</button>
+      <button data-p="bycat">ยอดขายตามหมวด</button>
+      <button data-p="byday">ยอดขายรายวัน</button>
+      <button data-p="bymonth">ยอดขายรายเดือน</button>
+      <button data-p="byproduct">ยอดขายตามสินค้า</button>
+      <button data-p="byoption">ยอดขายตามกลุ่มตัวเลือก</button>
+    </nav></div></div>
+
+    <nav>
+      <button data-p="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>รายละเอียดสินค้า</button>
+    </nav>
+
+    <button class="navgrp" data-g="gHistory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      ประวัติ<span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gHistory"><div class="cinner"><nav class="sub">
+      <button data-p="shifts">ประวัติกะ</button>
+      <button data-p="audit">ประวัติการแก้ไข</button>
+    </nav></div></div>
+
+    <div class="navsec">จัดการข้อมูล</div>
+
+    <button class="navgrp" data-g="gStock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 8-9-5-9 5 9 5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg>
+      คลังสินค้า<span class="cnt" id="lowCnt" hidden></span><span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gStock"><div class="cinner"><nav class="sub">
+      <button data-p="stock">ภาพรวมสต็อก</button>
+      <button data-p="receive">รับของเข้าหน้าร้าน</button>
+      <button data-p="count">นับสต็อกจริง</button>
+      <button data-p="usage">การใช้ &amp; ของหาย</button>
+      <button data-p="moves">ประวัติเคลื่อนไหว</button>
+    </nav></div></div>
+
+    <button class="navgrp" data-g="gMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M9 7h6M9 11h6"/></svg>
+      เมนู &amp; สูตร<span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gMenu"><div class="cinner"><nav class="sub">
+      <button data-p="menu">เมนู &amp; ราคา</button>
+      <button data-p="recipe">สูตร &amp; ต้นทุน</button>
+      <button data-p="options">กลุ่มตัวเลือก</button>
+    </nav></div></div>
+
+    <button class="navgrp" data-g="gSys">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 11.5a3 3 0 1 0-1.5-5.6M18 20a5.5 5.5 0 0 0-2-4.2"/></svg>
+      ระบบ<span class="arw">›</span>
+    </button>
+    <div class="cwrap" id="wrap-gSys"><div class="cinner"><nav class="sub">
+      <button data-p="staff">พนักงาน</button>
+      <button data-p="settings">ตั้งค่า</button>
+    </nav></div></div>
+
+    <div class="navsec">อื่นๆ</div>
+    <nav>
+      <button data-p="finance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10a3 3 0 0 1 3-3h.5a2.5 2.5 0 0 1 0 5H12a2.5 2.5 0 0 0 0 5h.5a3 3 0 0 0 3-3"/></svg>รายรับ-รายจ่าย ↗</button>
+    </nav>
+
+    <div class="side-foot" id="foot">Banfa Back Office</div>
+  </aside>
+
+  <main class="main">
+    <header class="bar">
+      <button class="burger" id="burger" aria-label="เมนู">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <h1 id="title">ภาพรวมร้านค้า</h1>
+      <button class="chip-b" id="toPos" title="กลับไปหน้าขาย">↩ หน้าขาย</button>
+      <span class="syncchip ok" id="sync">พร้อม</span>
+      <div id="range" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="chip-b on" data-d="0">วันนี้</button>
+        <button class="chip-b" data-d="1">เมื่อวาน</button>
+        <button class="chip-b" data-d="7">7 วัน</button>
+        <button class="chip-b" data-d="30">30 วัน</button>
+        <div class="rangebox"><input type="date" id="from"><span>–</span><input type="date" id="to"></div>
+        <button class="go" id="apply">ตกลง</button>
+      </div>
+    </header>
+    <div class="scroll"><div class="wrap" id="page"></div></div>
+  </main>
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button data-p="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3zM13 21h8V11h-8zM13 7h8V3h-8zM3 21h8v-4H3z"/></svg>ภาพรวม</button>
+  <button data-p="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>ยอดขาย</button>
+  <button data-p="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m21 8-9-5-9 5 9 5 9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></svg>สต็อก<span class="dot" id="tabDot" hidden></span></button>
+  <button data-p="shifts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>กะ</button>
+  <button id="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>ทั้งหมด</button>
+</nav>
+
+<div class="dlg" id="dlg"><div class="dlgbox">
+  <b id="dlgTitle"></b><p id="dlgMsg"></p>
+  <input id="dlgInput" type="text" hidden>
+  <div class="dlgbtns"><button class="no" id="dlgNo">ยกเลิก</button><button class="yes" id="dlgYes">ยืนยัน</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script src="config-admin.js"></script>
+<script src="admin-core.js?v=2026.09.25-a"></script>
+<script src="admin-nav.js?v=2026.09.25-a"></script>
+<script src="admin-reports.js?v=2026.09.25-a"></script>
+<script src="admin-stock.js?v=2026.09.25-a"></script>
+<script src="admin-menu.js?v=2026.09.25-a"></script>
+<script src="admin-staff.js?v=2026.09.25-a"></script>
+<script src="admin-init.js?v=2026.09.25-a"></script>
+</body>
+</html>
